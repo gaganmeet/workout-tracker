@@ -156,6 +156,17 @@ export async function deleteSet(setId: string): Promise<void> {
   if (error) throw error
 }
 
+export async function updateWorkoutExerciseNotes(
+  workoutExerciseId: string,
+  notes: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('workout_exercises')
+    .update({ notes: notes.trim() || null })
+    .eq('id', workoutExerciseId)
+  if (error) throw error
+}
+
 export async function finishSession(sessionId: string): Promise<void> {
   const { error } = await supabase
     .from('workout_sessions')

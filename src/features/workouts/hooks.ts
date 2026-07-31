@@ -10,6 +10,7 @@ import {
   fetchSessionHistory,
   finishSession,
   updateSet,
+  updateWorkoutExerciseNotes,
   type SetPatch,
 } from './api'
 
@@ -91,6 +92,17 @@ export function useFinishSession(sessionId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['workoutSessions', sessionId] })
       void queryClient.invalidateQueries({ queryKey: ['workoutSessions', 'history'] })
+    },
+  })
+}
+
+export function useUpdateWorkoutExerciseNotes(sessionId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ workoutExerciseId, notes }: { workoutExerciseId: string; notes: string }) =>
+      updateWorkoutExerciseNotes(workoutExerciseId, notes),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['workoutSessions', sessionId] })
     },
   })
 }

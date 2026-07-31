@@ -83,6 +83,14 @@ export function WorkoutDetailPage() {
                   </div>
                 ))}
               </div>
+              {workoutExercise.notes && (
+                <div className="space-y-1 border-t pt-2">
+                  <p className="text-muted-foreground text-xs font-medium">
+                    {isCoachView ? "Client's notes" : 'Your notes'}
+                  </p>
+                  <p className="text-sm whitespace-pre-wrap">{workoutExercise.notes}</p>
+                </div>
+              )}
               <WorkoutExerciseNotes
                 workoutExerciseId={workoutExercise.id}
                 exerciseId={workoutExercise.exercise_id}

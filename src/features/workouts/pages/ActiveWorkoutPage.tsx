@@ -13,6 +13,7 @@ import {
   useFinishSession,
   useSessionDetail,
   useUpdateSet,
+  useUpdateWorkoutExerciseNotes,
 } from '../hooks'
 import type { Exercise } from '@/types/domain'
 
@@ -24,6 +25,7 @@ export function ActiveWorkoutPage() {
   const addSet = useAddSet(sessionId!)
   const updateSet = useUpdateSet(sessionId!)
   const deleteSet = useDeleteSet(sessionId!)
+  const updateNotes = useUpdateWorkoutExerciseNotes(sessionId!)
   const finishSession = useFinishSession(sessionId!)
   const deleteSession = useDeleteSession()
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -97,6 +99,9 @@ export function ActiveWorkoutPage() {
             }
             onUpdateSet={(setId, patch) => updateSet.mutate({ setId, patch })}
             onDeleteSet={(setId) => deleteSet.mutate(setId)}
+            onUpdateNotes={(notes) =>
+              updateNotes.mutate({ workoutExerciseId: workoutExercise.id, notes })
+            }
           />
         ))}
       </div>

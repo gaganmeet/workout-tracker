@@ -429,6 +429,7 @@ export type Database = {
           exercise_id: string
           exercise_order: number
           id: string
+          notes: string | null
           plan_day_exercise_id: string | null
           workout_session_id: string
         }
@@ -437,6 +438,7 @@ export type Database = {
           exercise_id: string
           exercise_order?: number
           id?: string
+          notes?: string | null
           plan_day_exercise_id?: string | null
           workout_session_id: string
         }
@@ -445,6 +447,7 @@ export type Database = {
           exercise_id?: string
           exercise_order?: number
           id?: string
+          notes?: string | null
           plan_day_exercise_id?: string | null
           workout_session_id?: string
         }

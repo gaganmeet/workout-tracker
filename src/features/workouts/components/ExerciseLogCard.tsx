@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
 import { NoteList } from '@/features/notes/components/NoteList'
 import { useNotesForPlanDayExercise } from '@/features/notes/hooks'
 import { TutorialVideoLink } from '@/features/exercises/components/TutorialVideoLink'
@@ -18,11 +20,51 @@ function PlanNotesPreview({ planDayExerciseId }: { planDayExerciseId: string }) 
   )
 }
 
+function MyExerciseNote({
+  initialNotes,
+  onUpdate,
+}: {
+  initialNotes: string | null
+  onUpdate: (notes: string) => void
+}) {
+  const [editing, setEditing] = useState(!!initialNotes)
+  const [value, setValue] = useState(initialNotes ?? '')
+
+  if (!editing) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="text-muted-foreground h-auto p-0"
+        onClick={() => setEditing(true)}
+      >
+        <Plus className="mr-1 size-3.5" />
+        Add note
+      </Button>
+    )
+  }
+
+  return (
+    <div className="space-y-1 border-t pt-2">
+      <p className="text-muted-foreground text-xs font-medium">Your notes</p>
+      <Textarea
+        placeholder="e.g. felt strong today, left shoulder tight on set 3..."
+        className="min-h-14 text-sm"
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        onBlur={() => onUpdate(value)}
+      />
+    </div>
+  )
+}
+
 export function ExerciseLogCard({
   workoutExercise,
   onAddSet,
   onUpdateSet,
   onDeleteSet,
+  onUpdateNotes,
 }: {
   workoutExercise: WorkoutExerciseWithDetails
   onAddSet: () => void
@@ -31,6 +73,7 @@ export function ExerciseLogCard({
     patch: { weight?: number | null; reps?: number | null; rpe?: number | null; completed?: boolean },
   ) => void
   onDeleteSet: (setId: string) => void
+  onUpdateNotes: (notes: string) => void
 }) {
   return (
     <Card>
@@ -65,6 +108,7 @@ export function ExerciseLogCard({
           <Plus className="mr-1 size-4" />
           Add set
         </Button>
+        <MyExerciseNote initialNotes={workoutExercise.notes} onUpdate={onUpdateNotes} />
         {workoutExercise.plan_day_exercise_id && (
           <PlanNotesPreview planDayExerciseId={workoutExercise.plan_day_exercise_id} />
         )}
