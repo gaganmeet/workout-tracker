@@ -12,6 +12,12 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 
 const SignInPage = lazy(() => import('@/features/auth/pages/SignInPage').then((m) => ({ default: m.SignInPage })))
 const SignUpPage = lazy(() => import('@/features/auth/pages/SignUpPage').then((m) => ({ default: m.SignUpPage })))
+const ForgotPasswordPage = lazy(() =>
+  import('@/features/auth/pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })),
+)
+const ResetPasswordPage = lazy(() =>
+  import('@/features/auth/pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })),
+)
 const AthleteDashboardPage = lazy(() =>
   import('@/features/workouts/pages/AthleteDashboardPage').then((m) => ({ default: m.AthleteDashboardPage })),
 )
@@ -105,6 +111,8 @@ function AppRoutes() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route element={<RequireAuth><AthleteLayout /></RequireAuth>}>
           <Route path="/app/dashboard" element={<AthleteDashboardPage />} />
