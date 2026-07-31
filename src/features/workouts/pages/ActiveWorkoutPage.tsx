@@ -53,13 +53,35 @@ export function ActiveWorkoutPage() {
     }
   }
 
+  async function handleDiscard() {
+    if (!confirm('End this workout without saving it? Everything logged so far will be deleted.')) {
+      return
+    }
+    try {
+      await deleteSession.mutateAsync(sessionId!)
+      toast.success('Workout discarded')
+      navigate('/app/dashboard', { replace: true })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to discard workout')
+    }
+  }
+
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">{session.name ?? 'Workout'}</h1>
-        <Button onClick={() => void handleFinish()} disabled={finishSession.isPending}>
-          {finishSession.isPending ? 'Finishing...' : 'Finish'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => void handleDiscard()}
+            disabled={deleteSession.isPending}
+          >
+            Discard
+          </Button>
+          <Button onClick={() => void handleFinish()} disabled={finishSession.isPending}>
+            {finishSession.isPending ? 'Finishing...' : 'Finish'}
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-3">
