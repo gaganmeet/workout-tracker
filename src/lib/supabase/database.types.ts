@@ -528,6 +528,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_own_account: { Args: never; Returns: undefined }
       save_plan: { Args: { payload: Json }; Returns: string }
       search_coaches: {
         Args: { query: string }

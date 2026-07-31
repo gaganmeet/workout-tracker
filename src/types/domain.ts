@@ -6,6 +6,7 @@ export type Profile = Tables['profiles']['Row']
 export type UserRole = Database['public']['Enums']['user_role']
 export type MuscleGroup = Database['public']['Enums']['muscle_group']
 export type EquipmentType = Database['public']['Enums']['equipment_type']
+export type WeightUnit = Database['public']['Enums']['weight_unit']
 
 export type CoachClientLink = Tables['coach_client_links']['Row']
 export type Exercise = Tables['exercises']['Row']

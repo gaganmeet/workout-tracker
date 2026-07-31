@@ -7,7 +7,6 @@ import { RequireRole } from '@/features/auth/RequireRole'
 import { AppShell } from '@/components/layout/AppShell'
 import { ReloadPrompt } from '@/components/layout/ReloadPrompt'
 import { OfflineBanner } from '@/components/layout/OfflineBanner'
-import { ComingSoonPage } from '@/pages/ComingSoonPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 const SignInPage = lazy(() => import('@/features/auth/pages/SignInPage').then((m) => ({ default: m.SignInPage })))
@@ -69,6 +68,9 @@ const CoachPlansPage = lazy(() =>
 const NewClientPlanPage = lazy(() =>
   import('@/features/coaching/pages/NewClientPlanPage').then((m) => ({ default: m.NewClientPlanPage })),
 )
+const SettingsPage = lazy(() =>
+  import('@/features/settings/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+)
 
 function PageFallback() {
   return <p className="text-muted-foreground p-4 text-sm">Loading...</p>
@@ -128,7 +130,7 @@ function AppRoutes() {
           <Route path="/app/exercises/:exerciseId" element={<ExerciseDetailPage />} />
           <Route path="/app/progress" element={<ProgressPage />} />
           <Route path="/app/coach" element={<FindCoachPage />} />
-          <Route path="/app/settings" element={<ComingSoonPage title="Settings" />} />
+          <Route path="/app/settings" element={<SettingsPage />} />
         </Route>
 
         <Route element={<RequireAuth><CoachLayout /></RequireAuth>}>
@@ -145,7 +147,7 @@ function AppRoutes() {
           <Route path="/coach/plans/new" element={<PlanEditorPage />} />
           <Route path="/coach/plans/:planId" element={<PlanDetailPage basePath="/coach/plans" />} />
           <Route path="/coach/plans/:planId/edit" element={<PlanEditorPage />} />
-          <Route path="/coach/settings" element={<ComingSoonPage title="Settings" />} />
+          <Route path="/coach/settings" element={<SettingsPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
