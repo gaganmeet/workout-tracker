@@ -3,7 +3,7 @@ import { Check, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { SetRow as SetRowData } from '../api'
+import type { PreviousSet, SetRow as SetRowData } from '../api'
 
 function numberOrNull(value: string): number | null {
   if (value.trim() === '') return null
@@ -14,11 +14,13 @@ function numberOrNull(value: string): number | null {
 export function SetRow({
   set,
   index,
+  previous,
   onUpdate,
   onDelete,
 }: {
   set: SetRowData
   index: number
+  previous?: PreviousSet
   onUpdate: (patch: { weight?: number | null; reps?: number | null; rpe?: number | null; completed?: boolean }) => void
   onDelete: () => void
 }) {
@@ -32,7 +34,7 @@ export function SetRow({
       <Input
         type="number"
         inputMode="decimal"
-        placeholder="kg"
+        placeholder={previous?.weight != null ? String(previous.weight) : 'kg'}
         className="h-9"
         value={weight}
         onChange={(event) => setWeight(event.target.value)}
@@ -41,7 +43,7 @@ export function SetRow({
       <Input
         type="number"
         inputMode="numeric"
-        placeholder="reps"
+        placeholder={previous?.reps != null ? String(previous.reps) : 'reps'}
         className="h-9"
         value={reps}
         onChange={(event) => setReps(event.target.value)}
@@ -50,7 +52,7 @@ export function SetRow({
       <Input
         type="number"
         inputMode="decimal"
-        placeholder="RPE"
+        placeholder={previous?.rpe != null ? String(previous.rpe) : 'RPE'}
         min={0}
         max={10}
         step={0.5}

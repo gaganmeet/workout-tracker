@@ -6,6 +6,7 @@ import {
   createSessionFromPlanDay,
   deleteSession,
   deleteSet,
+  fetchPreviousSets,
   fetchSessionDetail,
   fetchSessionHistory,
   finishSession,
@@ -104,6 +105,18 @@ export function useUpdateWorkoutExerciseNotes(sessionId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['workoutSessions', sessionId] })
     },
+  })
+}
+
+export function usePreviousSets(
+  userId: string | undefined,
+  exerciseId: string | undefined,
+  excludeSessionId: string | undefined,
+) {
+  return useQuery({
+    queryKey: ['workoutSessions', 'previousSets', userId, exerciseId, excludeSessionId],
+    queryFn: () => fetchPreviousSets(userId!, exerciseId!, excludeSessionId!),
+    enabled: !!userId && !!exerciseId && !!excludeSessionId,
   })
 }
 

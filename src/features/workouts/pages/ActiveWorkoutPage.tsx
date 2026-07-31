@@ -91,6 +91,8 @@ export function ActiveWorkoutPage() {
           <ExerciseLogCard
             key={workoutExercise.id}
             workoutExercise={workoutExercise}
+            userId={session.user_id}
+            sessionId={sessionId!}
             onAddSet={() =>
               addSet.mutate({
                 workoutExerciseId: workoutExercise.id,

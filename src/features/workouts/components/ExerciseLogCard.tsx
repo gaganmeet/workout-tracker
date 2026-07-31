@@ -7,6 +7,7 @@ import { NoteList } from '@/features/notes/components/NoteList'
 import { useNotesForPlanDayExercise } from '@/features/notes/hooks'
 import { TutorialVideoLink } from '@/features/exercises/components/TutorialVideoLink'
 import { SetRow } from './SetRow'
+import { usePreviousSets } from '../hooks'
 import type { WorkoutExerciseWithDetails } from '../api'
 
 function PlanNotesPreview({ planDayExerciseId }: { planDayExerciseId: string }) {
@@ -61,12 +62,16 @@ function MyExerciseNote({
 
 export function ExerciseLogCard({
   workoutExercise,
+  userId,
+  sessionId,
   onAddSet,
   onUpdateSet,
   onDeleteSet,
   onUpdateNotes,
 }: {
   workoutExercise: WorkoutExerciseWithDetails
+  userId: string
+  sessionId: string
   onAddSet: () => void
   onUpdateSet: (
     setId: string,
@@ -75,6 +80,8 @@ export function ExerciseLogCard({
   onDeleteSet: (setId: string) => void
   onUpdateNotes: (notes: string) => void
 }) {
+  const { data: previousSets } = usePreviousSets(userId, workoutExercise.exercise_id, sessionId)
+
   return (
     <Card>
       <CardHeader>
@@ -100,6 +107,7 @@ export function ExerciseLogCard({
             key={set.id}
             set={set}
             index={index}
+            previous={previousSets?.[index]}
             onUpdate={(patch) => onUpdateSet(set.id, patch)}
             onDelete={() => onDeleteSet(set.id)}
           />

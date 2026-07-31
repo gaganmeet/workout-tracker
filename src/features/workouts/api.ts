@@ -179,3 +179,46 @@ export async function deleteSession(sessionId: string): Promise<void> {
   const { error } = await supabase.from('workout_sessions').delete().eq('id', sessionId)
   if (error) throw error
 }
+
+export interface PreviousSet {
+  weight: number | null
+  reps: number | null
+  rpe: number | null
+}
+
+// Most recent OTHER session where this user logged this exercise, ordered
+// by set_order, so a given set row's index lines up with "the same set last
+// time" -- used to show last time's numbers as placeholders while logging.
+//
+// Queries FROM workout_sessions (not workout_exercises) so `.order()` sorts
+// by that table's own started_at column directly. Ordering via
+// `{ referencedTable }` only reorders a *nested* array within an embedded
+// resource -- it does not drive which row a top-level `.limit()` keeps, so
+// querying from the child table with the parent embedded silently returned
+// an arbitrary session instead of the most recent one.
+export async function fetchPreviousSets(
+  userId: string,
+  exerciseId: string,
+  excludeSessionId: string,
+): Promise<PreviousSet[]> {
+  const { data: previousSessions, error: sessionError } = await supabase
+    .from('workout_sessions')
+    .select('workout_exercises!inner(id, exercise_id)')
+    .eq('user_id', userId)
+    .eq('workout_exercises.exercise_id', exerciseId)
+    .neq('id', excludeSessionId)
+    .order('started_at', { ascending: false })
+    .limit(1)
+  if (sessionError) throw sessionError
+  if (!previousSessions || previousSessions.length === 0) return []
+
+  const previousWorkoutExerciseId = previousSessions[0].workout_exercises[0].id
+
+  const { data: sets, error: setsError } = await supabase
+    .from('sets')
+    .select('weight, reps, rpe')
+    .eq('workout_exercise_id', previousWorkoutExerciseId)
+    .order('set_order')
+  if (setsError) throw setsError
+  return sets
+}
