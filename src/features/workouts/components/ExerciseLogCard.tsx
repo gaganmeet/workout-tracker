@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { NoteList } from '@/features/notes/components/NoteList'
 import { useNotesForPlanDayExercise } from '@/features/notes/hooks'
+import { TutorialVideoLink } from '@/features/exercises/components/TutorialVideoLink'
 import { SetRow } from './SetRow'
 import type { WorkoutExerciseWithDetails } from '../api'
 
@@ -35,6 +36,11 @@ export function ExerciseLogCard({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">{workoutExercise.exercises.name}</CardTitle>
+        <TutorialVideoLink
+          exerciseId={workoutExercise.exercises.id}
+          exerciseName={workoutExercise.exercises.name}
+          videoUrl={workoutExercise.exercises.video_url}
+        />
       </CardHeader>
       <CardContent className="space-y-2">
         {workoutExercise.sets.length > 0 && (

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/features/auth/AuthContext'
+import { TutorialVideoLink } from '@/features/exercises/components/TutorialVideoLink'
 import { usePlanDetail, useDeletePlan } from '../hooks'
 import { PlanExerciseNotes } from '../components/PlanExerciseNotes'
 
@@ -85,6 +86,11 @@ export function PlanDetailPage({ basePath = '/app/plans' }: { basePath?: string 
                       {exercise.target_rpe ? ` @ RPE ${exercise.target_rpe}` : ''}
                     </Badge>
                   </div>
+                  <TutorialVideoLink
+                    exerciseId={exercise.exercises.id}
+                    exerciseName={exercise.exercises.name}
+                    videoUrl={exercise.exercises.video_url}
+                  />
                   {notesClientId && (
                     <PlanExerciseNotes
                       planDayExerciseId={exercise.id}

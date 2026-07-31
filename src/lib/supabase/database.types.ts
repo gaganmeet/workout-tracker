@@ -146,6 +146,7 @@ export type Database = {
           id: string
           muscle_group: Database["public"]["Enums"]["muscle_group"] | null
           name: string
+          video_url: string | null
         }
         Insert: {
           created_at?: string
@@ -154,6 +155,7 @@ export type Database = {
           id?: string
           muscle_group?: Database["public"]["Enums"]["muscle_group"] | null
           name: string
+          video_url?: string | null
         }
         Update: {
           created_at?: string
@@ -162,6 +164,7 @@ export type Database = {
           id?: string
           muscle_group?: Database["public"]["Enums"]["muscle_group"] | null
           name?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -530,6 +533,24 @@ export type Database = {
           id: string
           username: string
         }[]
+      }
+      set_exercise_video_url: {
+        Args: { p_exercise_id: string; p_video_url: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          equipment: Database["public"]["Enums"]["equipment_type"] | null
+          id: string
+          muscle_group: Database["public"]["Enums"]["muscle_group"] | null
+          name: string
+          video_url: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "exercises"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {

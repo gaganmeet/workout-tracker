@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createExercise, fetchExercise, fetchExercises, type CreateExerciseInput } from './api'
+import {
+  createExercise,
+  fetchExercise,
+  fetchExercises,
+  setExerciseVideoUrl,
+  type CreateExerciseInput,
+} from './api'
 
 export function useExercises() {
   return useQuery({
@@ -22,6 +28,17 @@ export function useCreateExercise() {
     mutationFn: (input: CreateExerciseInput) => createExercise(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['exercises', 'list'] })
+    },
+  })
+}
+
+export function useSetExerciseVideoUrl() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ exerciseId, videoUrl }: { exerciseId: string; videoUrl: string }) =>
+      setExerciseVideoUrl(exerciseId, videoUrl),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['exercises'] })
     },
   })
 }

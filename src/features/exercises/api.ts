@@ -34,3 +34,12 @@ export async function createExercise(input: CreateExerciseInput): Promise<Exerci
   if (error) throw error
   return data
 }
+
+export async function setExerciseVideoUrl(exerciseId: string, videoUrl: string): Promise<Exercise> {
+  const { data, error } = await supabase.rpc('set_exercise_video_url', {
+    p_exercise_id: exerciseId,
+    p_video_url: videoUrl,
+  })
+  if (error) throw error
+  return data
+}

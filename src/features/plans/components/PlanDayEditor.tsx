@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ExercisePicker } from '@/features/exercises/components/ExercisePicker'
+import { TutorialVideoLinkById } from '@/features/exercises/components/TutorialVideoLinkById'
 import type { DraftDay, DraftExercise } from '../types'
 import type { Exercise } from '@/types/domain'
 
@@ -130,6 +131,10 @@ export function PlanDayEditor({
                 />
               </div>
             </div>
+            <TutorialVideoLinkById
+              exerciseId={exercise.exerciseId}
+              exerciseName={exercise.exerciseName}
+            />
           </div>
         ))}
         <Button type="button" variant="outline" size="sm" onClick={() => setPickerOpen(true)}>

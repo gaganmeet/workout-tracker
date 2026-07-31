@@ -9,6 +9,7 @@ import { OneRepMaxChart } from '@/features/progress/components/OneRepMaxChart'
 import { VolumeChart } from '@/features/progress/components/VolumeChart'
 import { useExercise } from '../hooks'
 import { equipmentLabel, muscleGroupLabel } from '../constants'
+import { TutorialVideoLink } from '../components/TutorialVideoLink'
 
 export function ExerciseDetailPage() {
   const { exerciseId } = useParams<{ exerciseId: string }>()
@@ -29,9 +30,16 @@ export function ExerciseDetailPage() {
     <div className="space-y-4 p-4">
       <div>
         <h1 className="text-xl font-semibold">{exercise.name}</h1>
-        <div className="mt-1 flex gap-2">
+        <div className="mt-1 flex items-center gap-2">
           <Badge variant="secondary">{muscleGroupLabel(exercise.muscle_group)}</Badge>
           <Badge variant="secondary">{equipmentLabel(exercise.equipment)}</Badge>
+        </div>
+        <div className="mt-2">
+          <TutorialVideoLink
+            exerciseId={exercise.id}
+            exerciseName={exercise.name}
+            videoUrl={exercise.video_url}
+          />
         </div>
       </div>
       <Card>
