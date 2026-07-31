@@ -12,6 +12,7 @@ interface RawSet {
   weight: number | null
   reps: number | null
   completed: boolean
+  is_warmup: boolean
 }
 
 interface RawWorkoutExercise {
@@ -35,7 +36,7 @@ export async function fetchExerciseProgress(
 ): Promise<SessionPoint[]> {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .select('id, started_at, workout_exercises!inner(sets(weight, reps, completed))')
+    .select('id, started_at, workout_exercises!inner(sets(weight, reps, completed, is_warmup))')
     .eq('user_id', userId)
     .eq('workout_exercises.exercise_id', exerciseId)
     .order('started_at', { ascending: true })
@@ -46,7 +47,7 @@ export async function fetchExerciseProgress(
   return sessions.map((session) => {
     const completedSets = session.workout_exercises
       .flatMap((we) => we.sets)
-      .filter((set) => set.completed && set.weight != null && set.reps != null)
+      .filter((set) => set.completed && !set.is_warmup && set.weight != null && set.reps != null)
 
     let topWeight: number | null = null
     let estOneRepMax: number | null = null

@@ -140,6 +140,7 @@ export interface SetPatch {
   reps?: number | null
   rpe?: number | null
   completed?: boolean
+  is_warmup?: boolean
 }
 
 export async function updateSet(setId: string, patch: SetPatch): Promise<void> {

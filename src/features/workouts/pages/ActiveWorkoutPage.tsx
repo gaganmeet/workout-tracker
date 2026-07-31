@@ -5,6 +5,8 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExercisePicker } from '@/features/exercises/components/ExercisePicker'
 import { ExerciseLogCard } from '../components/ExerciseLogCard'
+import { RestTimerBar, RestTimerIdleControl } from '../components/RestTimer'
+import { useRestTimer } from '../useRestTimer'
 import {
   useAddSet,
   useAddWorkoutExercise,
@@ -16,6 +18,7 @@ import {
   useUpdateWorkoutExerciseNotes,
 } from '../hooks'
 import type { Exercise } from '@/types/domain'
+import type { SetPatch } from '../api'
 
 export function ActiveWorkoutPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -28,7 +31,15 @@ export function ActiveWorkoutPage() {
   const updateNotes = useUpdateWorkoutExerciseNotes(sessionId!)
   const finishSession = useFinishSession(sessionId!)
   const deleteSession = useDeleteSession()
+  const restTimer = useRestTimer()
   const [pickerOpen, setPickerOpen] = useState(false)
+
+  function handleUpdateSet(setId: string, patch: SetPatch) {
+    updateSet.mutate({ setId, patch })
+    if (patch.completed) {
+      restTimer.start()
+    }
+  }
 
   if (isLoading) {
     return <p className="text-muted-foreground p-4 text-sm">Loading...</p>
@@ -86,6 +97,8 @@ export function ActiveWorkoutPage() {
         </div>
       </div>
 
+      {restTimer.secondsLeft <= 0 && <RestTimerIdleControl timer={restTimer} />}
+
       <div className="space-y-3">
         {session.workout_exercises.map((workoutExercise) => (
           <ExerciseLogCard
@@ -99,7 +112,7 @@ export function ActiveWorkoutPage() {
                 setOrder: workoutExercise.sets.length,
               })
             }
-            onUpdateSet={(setId, patch) => updateSet.mutate({ setId, patch })}
+            onUpdateSet={handleUpdateSet}
             onDeleteSet={(setId) => deleteSet.mutate(setId)}
             onUpdateNotes={(notes) =>
               updateNotes.mutate({ workoutExerciseId: workoutExercise.id, notes })
@@ -113,6 +126,7 @@ export function ActiveWorkoutPage() {
         Add exercise
       </Button>
       <ExercisePicker open={pickerOpen} onOpenChange={setPickerOpen} onSelect={handleAddExercise} />
+      <RestTimerBar timer={restTimer} />
     </div>
   )
 }

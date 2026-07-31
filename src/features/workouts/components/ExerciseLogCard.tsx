@@ -8,7 +8,7 @@ import { useNotesForPlanDayExercise } from '@/features/notes/hooks'
 import { TutorialVideoLink } from '@/features/exercises/components/TutorialVideoLink'
 import { SetRow } from './SetRow'
 import { usePreviousSets } from '../hooks'
-import type { WorkoutExerciseWithDetails } from '../api'
+import type { SetPatch, WorkoutExerciseWithDetails } from '../api'
 
 function PlanNotesPreview({ planDayExerciseId }: { planDayExerciseId: string }) {
   const { data: notes } = useNotesForPlanDayExercise(planDayExerciseId)
@@ -73,10 +73,7 @@ export function ExerciseLogCard({
   userId: string
   sessionId: string
   onAddSet: () => void
-  onUpdateSet: (
-    setId: string,
-    patch: { weight?: number | null; reps?: number | null; rpe?: number | null; completed?: boolean },
-  ) => void
+  onUpdateSet: (setId: string, patch: SetPatch) => void
   onDeleteSet: (setId: string) => void
   onUpdateNotes: (notes: string) => void
 }) {

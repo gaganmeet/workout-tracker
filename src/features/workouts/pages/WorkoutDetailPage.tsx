@@ -76,10 +76,11 @@ export function WorkoutDetailPage() {
               <div className="space-y-1">
                 {workoutExercise.sets.map((set, index) => (
                   <div key={set.id} className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground w-5">{index + 1}</span>
+                    <span className="text-muted-foreground w-5">{set.is_warmup ? 'W' : index + 1}</span>
                     <span className="flex-1">{set.weight ?? '-'} kg</span>
                     <span className="flex-1">{set.reps ?? '-'} reps</span>
                     <span className="flex-1">{set.rpe ? `RPE ${set.rpe}` : '-'}</span>
+                    {set.is_warmup && <Badge variant="outline">Warm-up</Badge>}
                     {set.completed && <Badge variant="secondary">Done</Badge>}
                   </div>
                 ))}

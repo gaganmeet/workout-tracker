@@ -3,7 +3,7 @@ import { Check, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { PreviousSet, SetRow as SetRowData } from '../api'
+import type { PreviousSet, SetPatch, SetRow as SetRowData } from '../api'
 
 function numberOrNull(value: string): number | null {
   if (value.trim() === '') return null
@@ -21,7 +21,7 @@ export function SetRow({
   set: SetRowData
   index: number
   previous?: PreviousSet
-  onUpdate: (patch: { weight?: number | null; reps?: number | null; rpe?: number | null; completed?: boolean }) => void
+  onUpdate: (patch: SetPatch) => void
   onDelete: () => void
 }) {
   const [weight, setWeight] = useState(set.weight?.toString() ?? '')
@@ -30,7 +30,18 @@ export function SetRow({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-muted-foreground w-5 text-center text-sm">{index + 1}</span>
+      <Button
+        type="button"
+        variant="ghost"
+        className={cn(
+          'h-9 w-9 shrink-0 rounded-md p-0 text-sm font-medium',
+          set.is_warmup && 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-950 dark:text-amber-400',
+        )}
+        title={set.is_warmup ? 'Warm-up set (tap to mark as working set)' : 'Working set (tap to mark as warm-up)'}
+        onClick={() => onUpdate({ is_warmup: !set.is_warmup })}
+      >
+        {set.is_warmup ? 'W' : index + 1}
+      </Button>
       <Input
         type="number"
         inputMode="decimal"
