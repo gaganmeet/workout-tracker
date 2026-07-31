@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/features/auth/AuthContext'
+import { ModeToggle } from './ModeToggle'
 
 function initials(name: string | null | undefined) {
   if (!name) return '?'
@@ -30,34 +31,37 @@ export function TopBar() {
       <Link to={profile?.role === 'coach' ? '/coach/dashboard' : '/app/dashboard'} className="font-semibold">
         Workout Tracker
       </Link>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Avatar className="size-8">
-              <AvatarFallback>{initials(profile?.display_name ?? profile?.username)}</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {isAthlete && (
+      <div className="flex items-center gap-1">
+        <ModeToggle />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Avatar className="size-8">
+                <AvatarFallback>{initials(profile?.display_name ?? profile?.username)}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {isAthlete && (
+              <DropdownMenuItem asChild>
+                <Link to="/app/exercises">Exercises</Link>
+              </DropdownMenuItem>
+            )}
+            {isAthlete && (
+              <DropdownMenuItem asChild>
+                <Link to="/app/coach">Find a coach</Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem asChild>
-              <Link to="/app/exercises">Exercises</Link>
+              <Link to={settingsPath}>Settings</Link>
             </DropdownMenuItem>
-          )}
-          {isAthlete && (
-            <DropdownMenuItem asChild>
-              <Link to="/app/coach">Find a coach</Link>
+            <DropdownMenuItem onClick={() => void signOut()}>
+              <LogOut className="mr-2 size-4" />
+              Sign out
             </DropdownMenuItem>
-          )}
-          <DropdownMenuItem asChild>
-            <Link to={settingsPath}>Settings</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => void signOut()}>
-            <LogOut className="mr-2 size-4" />
-            Sign out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   )
 }
