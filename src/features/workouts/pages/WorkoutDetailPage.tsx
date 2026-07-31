@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/AuthContext'
 import { WorkoutExerciseNotes } from '../components/WorkoutExerciseNotes'
+import { ExerciseProgressSection } from '../components/ExerciseProgressSection'
 import { useDeleteSession, useSessionDetail } from '../hooks'
 
 export function WorkoutDetailPage() {
@@ -96,6 +97,10 @@ export function WorkoutDetailPage() {
                 exerciseId={workoutExercise.exercise_id}
                 clientId={session.user_id}
                 coachId={isCoachView ? profile?.id : undefined}
+              />
+              <ExerciseProgressSection
+                userId={session.user_id}
+                exerciseId={workoutExercise.exercise_id}
               />
             </CardContent>
           </Card>
