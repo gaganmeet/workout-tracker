@@ -29,7 +29,7 @@ export function TopBar() {
   return (
     <header className="border-border bg-background sticky top-0 z-10 flex h-14 items-center justify-between border-b px-4">
       <Link to={profile?.role === 'coach' ? '/coach/dashboard' : '/app/dashboard'} className="font-semibold">
-        Workout Tracker
+        SwoleBalli
       </Link>
       <div className="flex items-center gap-1">
         <ModeToggle />

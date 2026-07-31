@@ -1,6 +1,6 @@
-# Workout Tracker
+# SwoleBalli
 
-React + TypeScript + Vite PWA for athletes and coaches, backed by Supabase.
+React + TypeScript + Vite PWA for athletes and coaches, backed by Supabase. Train like a legend.
 
 ## Setup
 

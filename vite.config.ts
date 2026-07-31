@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => {
         registerType: 'prompt',
         includeAssets: ['favicon.png', 'icons/apple-touch-icon.png'],
         manifest: {
-          name: 'Workout Tracker',
-          short_name: 'Lift',
-          description: 'Track your training. Coach your clients.',
+          name: 'SwoleBalli',
+          short_name: 'SwoleBalli',
+          description: 'Train like a legend. Track your training, coach your clients.',
           start_url: '/',
           scope: '/',
           display: 'standalone',
