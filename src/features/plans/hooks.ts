@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   deletePlan,
+  duplicatePlan,
   fetchAssignedPlans,
   fetchOwnPlans,
   fetchPlanDetail,
@@ -39,6 +40,16 @@ export function useSavePlan() {
     onSuccess: (planId) => {
       void queryClient.invalidateQueries({ queryKey: ['plans'] })
       void queryClient.invalidateQueries({ queryKey: ['plans', 'detail', planId] })
+    },
+  })
+}
+
+export function useDuplicatePlan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (planId: string) => duplicatePlan(planId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['plans'] })
     },
   })
 }

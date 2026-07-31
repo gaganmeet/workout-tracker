@@ -55,3 +55,34 @@ export async function deletePlan(planId: string): Promise<void> {
   const { error } = await supabase.from('plans').delete().eq('id', planId)
   if (error) throw error
 }
+
+// Reads whatever plan the caller has read access to (own, a linked coach's
+// client's plan, or one assigned to them) and saves it as a brand new plan.
+// save_plan always owns the new row by the calling user's own auth.uid(),
+// never a client-supplied value, so duplicating a coach-assigned plan
+// naturally becomes the athlete's own editable copy -- no separate
+// "new owner" param needed.
+export async function duplicatePlan(planId: string): Promise<string> {
+  const source = await fetchPlanDetail(planId)
+  if (!source) throw new Error('Plan not found')
+
+  const payload: SavePlanPayload = {
+    name: `${source.name} (copy)`,
+    description: source.description ?? undefined,
+    days: source.plan_days.map((day) => ({
+      name: day.name,
+      day_order: day.day_order,
+      exercises: day.plan_day_exercises.map((exercise) => ({
+        exercise_id: exercise.exercise_id,
+        exercise_order: exercise.exercise_order,
+        target_sets: exercise.target_sets,
+        target_reps_min: exercise.target_reps_min,
+        target_reps_max: exercise.target_reps_max,
+        target_rpe: exercise.target_rpe,
+        notes: exercise.notes,
+      })),
+    })),
+  }
+
+  return savePlan(payload)
+}

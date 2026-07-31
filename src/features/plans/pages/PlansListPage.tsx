@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/features/auth/AuthContext'
-import { useAssignedPlans, useOwnPlans } from '../hooks'
+import { useAssignedPlans, useDuplicatePlan, useOwnPlans } from '../hooks'
 import { PlanCard } from '../components/PlanCard'
 
 export function PlansListPage() {
@@ -11,6 +12,17 @@ export function PlansListPage() {
   const navigate = useNavigate()
   const { data: ownPlans, isLoading: loadingOwn } = useOwnPlans(profile?.id)
   const { data: assignedPlans, isLoading: loadingAssigned } = useAssignedPlans(profile?.id)
+  const duplicatePlan = useDuplicatePlan()
+
+  async function handleDuplicate(planId: string) {
+    try {
+      const newPlanId = await duplicatePlan.mutateAsync(planId)
+      toast.success('Plan duplicated')
+      navigate(`/app/plans/${newPlanId}/edit`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to duplicate plan')
+    }
+  }
 
   return (
     <div className="space-y-4 p-4">
@@ -34,7 +46,13 @@ export function PlansListPage() {
             <p className="text-muted-foreground text-sm">No plans yet. Create your first one.</p>
           )}
           {ownPlans?.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} onClick={() => navigate(`/app/plans/${plan.id}`)} />
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              onClick={() => navigate(`/app/plans/${plan.id}`)}
+              onDuplicate={() => void handleDuplicate(plan.id)}
+              duplicating={duplicatePlan.isPending}
+            />
           ))}
         </TabsContent>
         <TabsContent value="assigned" className="space-y-2">
@@ -47,6 +65,8 @@ export function PlansListPage() {
               key={assignment.plan_id}
               plan={assignment.plans}
               onClick={() => navigate(`/app/plans/${assignment.plan_id}`)}
+              onDuplicate={() => void handleDuplicate(assignment.plan_id)}
+              duplicating={duplicatePlan.isPending}
             />
           ))}
         </TabsContent>

@@ -1,14 +1,26 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/AuthContext'
-import { useOwnPlans } from '@/features/plans/hooks'
+import { useDuplicatePlan, useOwnPlans } from '@/features/plans/hooks'
 import { PlanCard } from '@/features/plans/components/PlanCard'
 
 export function CoachPlansPage() {
   const { profile } = useAuth()
   const { data: plans, isLoading } = useOwnPlans(profile?.id)
   const navigate = useNavigate()
+  const duplicatePlan = useDuplicatePlan()
+
+  async function handleDuplicate(planId: string) {
+    try {
+      const newPlanId = await duplicatePlan.mutateAsync(planId)
+      toast.success('Template duplicated')
+      navigate(`/coach/plans/${newPlanId}/edit`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to duplicate template')
+    }
+  }
 
   return (
     <div className="space-y-4 p-4">
@@ -29,7 +41,13 @@ export function CoachPlansPage() {
       )}
       <div className="space-y-2">
         {plans?.map((plan) => (
-          <PlanCard key={plan.id} plan={plan} onClick={() => navigate(`/coach/plans/${plan.id}`)} />
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            onClick={() => navigate(`/coach/plans/${plan.id}`)}
+            onDuplicate={() => void handleDuplicate(plan.id)}
+            duplicating={duplicatePlan.isPending}
+          />
         ))}
       </div>
     </div>
