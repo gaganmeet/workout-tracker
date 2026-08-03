@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase/client'
 import type { Json } from '@/lib/supabase/database.types'
-import type { Exercise, Plan, PlanDay, PlanDayExercise } from '@/types/domain'
+import type { Exercise, Plan, PlanDay, PlanDayExercise, Profile } from '@/types/domain'
 import type { SavePlanPayload } from './types'
 
 export async function fetchOwnPlans(ownerId: string): Promise<Plan[]> {
@@ -16,13 +16,13 @@ export async function fetchOwnPlans(ownerId: string): Promise<Plan[]> {
 export interface AssignedPlan {
   plan_id: string
   active: boolean
-  plans: Plan
+  plans: Plan & { profiles: Pick<Profile, 'id' | 'display_name' | 'username'> }
 }
 
 export async function fetchAssignedPlans(clientId: string): Promise<AssignedPlan[]> {
   const { data, error } = await supabase
     .from('plan_assignments')
-    .select('plan_id, active, plans(*)')
+    .select('plan_id, active, plans(*, profiles(id, display_name, username))')
     .eq('client_id', clientId)
     .eq('active', true)
   if (error) throw error

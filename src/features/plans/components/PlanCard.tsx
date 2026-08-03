@@ -5,11 +5,13 @@ import type { Plan } from '@/types/domain'
 
 export function PlanCard({
   plan,
+  ownerLabel,
   onClick,
   onDuplicate,
   duplicating,
 }: {
   plan: Plan
+  ownerLabel?: string
   onClick?: () => void
   onDuplicate?: () => void
   duplicating?: boolean
@@ -20,7 +22,10 @@ export function PlanCard({
       onClick={onClick}
     >
       <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-base">{plan.name}</CardTitle>
+        <div>
+          <CardTitle className="text-base">{plan.name}</CardTitle>
+          {ownerLabel && <p className="text-muted-foreground text-xs">From {ownerLabel}</p>}
+        </div>
         {onDuplicate && (
           <Button
             type="button"
