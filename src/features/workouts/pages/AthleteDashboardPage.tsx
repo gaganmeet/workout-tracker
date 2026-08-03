@@ -61,6 +61,7 @@ export function AthleteDashboardPage() {
             key={assignment.plan_id}
             plan={assignment.plans}
             ownerLabel={assignment.plans.profiles?.display_name ?? assignment.plans.profiles?.username ?? 'your coach'}
+            ownerId={assignment.plans.owner_id}
             startableDays={assignment.plans.plan_days}
             onClick={() => navigate(`/app/plans/${assignment.plan_id}`)}
           />

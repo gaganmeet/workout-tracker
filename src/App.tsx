@@ -71,6 +71,9 @@ const NewClientPlanPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('@/features/settings/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 )
+const ProfilePage = lazy(() =>
+  import('@/features/profiles/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
+)
 
 function PageFallback() {
   return <p className="text-muted-foreground p-4 text-sm">Loading...</p>
@@ -131,6 +134,7 @@ function AppRoutes() {
           <Route path="/app/progress" element={<ProgressPage />} />
           <Route path="/app/coach" element={<FindCoachPage />} />
           <Route path="/app/settings" element={<SettingsPage />} />
+          <Route path="/app/profile/:userId" element={<ProfilePage />} />
         </Route>
 
         <Route element={<RequireAuth><CoachLayout /></RequireAuth>}>
@@ -148,6 +152,7 @@ function AppRoutes() {
           <Route path="/coach/plans/:planId" element={<PlanDetailPage basePath="/coach/plans" />} />
           <Route path="/coach/plans/:planId/edit" element={<PlanEditorPage />} />
           <Route path="/coach/settings" element={<SettingsPage />} />
+          <Route path="/coach/profile/:userId" element={<ProfilePage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

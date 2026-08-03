@@ -82,6 +82,7 @@ export function PlansListPage() {
               key={plan.id}
               plan={plan}
               ownerLabel={plan.profiles?.display_name ?? plan.profiles?.username ?? 'someone'}
+              ownerId={plan.owner_id}
               onClick={() => navigate(`/app/plans/${plan.id}`)}
               onDuplicate={() => void handleDuplicate(plan.id)}
               duplicating={duplicatePlan.isPending}

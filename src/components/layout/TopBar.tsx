@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,9 @@ function initials(name: string | null | undefined) {
 
 export function TopBar() {
   const { profile, signOut } = useAuth()
-  const settingsPath = profile?.role === 'coach' ? '/coach/settings' : '/app/settings'
+  const rolePrefix = profile?.role === 'coach' ? '/coach' : '/app'
+  const settingsPath = `${rolePrefix}/settings`
+  const profilePath = `${rolePrefix}/profile/${profile?.id}`
   const isAthlete = profile?.role !== 'coach'
 
   return (
@@ -37,11 +39,15 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="size-8">
+                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
                 <AvatarFallback>{initials(profile?.display_name ?? profile?.username)}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to={profilePath}>My Profile</Link>
+            </DropdownMenuItem>
             {isAthlete && (
               <DropdownMenuItem asChild>
                 <Link to="/app/exercises">Exercises</Link>

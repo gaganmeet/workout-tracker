@@ -4,12 +4,13 @@ import type { Exercise, Plan, PlanDay, PlanDayExercise, Profile } from '@/types/
 import type { SavePlanPayload } from './types'
 
 export type PlanDaySummary = Pick<PlanDay, 'id' | 'name' | 'day_order'>
-export type PlanWithDays = Plan & { plan_days: PlanDaySummary[] }
+export type PlanStarRef = { user_id: string }
+export type PlanWithDays = Plan & { plan_days: PlanDaySummary[]; plan_stars: PlanStarRef[] }
 
 export async function fetchOwnPlans(ownerId: string): Promise<PlanWithDays[]> {
   const { data, error } = await supabase
     .from('plans')
-    .select('*, plan_days(id, name, day_order)')
+    .select('*, plan_days(id, name, day_order), plan_stars(user_id)')
     .eq('owner_id', ownerId)
     .order('updated_at', { ascending: false })
     .order('day_order', { referencedTable: 'plan_days' })
@@ -26,7 +27,9 @@ export interface AssignedPlan {
 export async function fetchAssignedPlans(clientId: string): Promise<AssignedPlan[]> {
   const { data, error } = await supabase
     .from('plan_assignments')
-    .select('plan_id, active, plans(*, profiles(id, display_name, username), plan_days(id, name, day_order))')
+    .select(
+      'plan_id, active, plans(*, profiles!plans_owner_id_fkey(id, display_name, username), plan_days(id, name, day_order), plan_stars(user_id))',
+    )
     .eq('client_id', clientId)
     .eq('active', true)
     .order('day_order', { referencedTable: 'plans.plan_days' })
@@ -36,15 +39,31 @@ export async function fetchAssignedPlans(clientId: string): Promise<AssignedPlan
 
 export type PublicPlan = PlanWithDays & { profiles: Pick<Profile, 'id' | 'display_name' | 'username'> | null }
 
+// Star count isn't a real column PostgREST can ORDER BY, so we fetch the
+// full star list per plan (small in practice) and sort client-side --
+// avoids a denormalized counter + trigger for what's a cheap in-memory sort
+// at this scale.
 export async function fetchPublicPlans(): Promise<PublicPlan[]> {
   const { data, error } = await supabase
     .from('plans')
-    .select('*, profiles(id, display_name, username), plan_days(id, name, day_order)')
+    .select('*, profiles!plans_owner_id_fkey(id, display_name, username), plan_days(id, name, day_order), plan_stars(user_id)')
     .eq('is_public', true)
-    .order('updated_at', { ascending: false })
     .order('day_order', { referencedTable: 'plan_days' })
   if (error) throw error
-  return data as unknown as PublicPlan[]
+  const plans = data as unknown as PublicPlan[]
+  return plans.sort((a, b) => b.plan_stars.length - a.plan_stars.length)
+}
+
+export async function fetchPublicPlansByOwner(ownerId: string): Promise<PublicPlan[]> {
+  const { data, error } = await supabase
+    .from('plans')
+    .select('*, profiles!plans_owner_id_fkey(id, display_name, username), plan_days(id, name, day_order), plan_stars(user_id)')
+    .eq('is_public', true)
+    .eq('owner_id', ownerId)
+    .order('day_order', { referencedTable: 'plan_days' })
+  if (error) throw error
+  const plans = data as unknown as PublicPlan[]
+  return plans.sort((a, b) => b.plan_stars.length - a.plan_stars.length)
 }
 
 export async function togglePlanPublic(planId: string, isPublic: boolean): Promise<void> {
@@ -52,14 +71,24 @@ export async function togglePlanPublic(planId: string, isPublic: boolean): Promi
   if (error) throw error
 }
 
+export async function starPlan(userId: string, planId: string): Promise<void> {
+  const { error } = await supabase.from('plan_stars').insert({ user_id: userId, plan_id: planId })
+  if (error) throw error
+}
+
+export async function unstarPlan(userId: string, planId: string): Promise<void> {
+  const { error } = await supabase.from('plan_stars').delete().eq('user_id', userId).eq('plan_id', planId)
+  if (error) throw error
+}
+
 export type PlanDayExerciseWithExercise = PlanDayExercise & { exercises: Exercise }
 export type PlanDayWithExercises = PlanDay & { plan_day_exercises: PlanDayExerciseWithExercise[] }
-export type PlanDetail = Plan & { plan_days: PlanDayWithExercises[] }
+export type PlanDetail = Plan & { plan_days: PlanDayWithExercises[]; plan_stars: PlanStarRef[] }
 
 export async function fetchPlanDetail(planId: string): Promise<PlanDetail | null> {
   const { data, error } = await supabase
     .from('plans')
-    .select('*, plan_days(*, plan_day_exercises(*, exercises(*)))')
+    .select('*, plan_days(*, plan_day_exercises(*, exercises(*))), plan_stars(user_id)')
     .eq('id', planId)
     .order('day_order', { referencedTable: 'plan_days' })
     .order('exercise_order', { referencedTable: 'plan_days.plan_day_exercises' })

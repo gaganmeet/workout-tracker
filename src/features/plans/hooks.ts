@@ -6,8 +6,11 @@ import {
   fetchOwnPlans,
   fetchPlanDetail,
   fetchPublicPlans,
+  fetchPublicPlansByOwner,
   savePlan,
+  starPlan,
   togglePlanPublic,
+  unstarPlan,
 } from './api'
 import type { SavePlanPayload } from './types'
 
@@ -31,6 +34,14 @@ export function usePublicPlans() {
   return useQuery({
     queryKey: ['plans', 'public'],
     queryFn: fetchPublicPlans,
+  })
+}
+
+export function usePublicPlansByOwner(ownerId: string | undefined) {
+  return useQuery({
+    queryKey: ['plans', 'publicByOwner', ownerId],
+    queryFn: () => fetchPublicPlansByOwner(ownerId!),
+    enabled: !!ownerId,
   })
 }
 
@@ -71,6 +82,17 @@ export function useTogglePlanPublic() {
     onSuccess: (_data, { planId }) => {
       void queryClient.invalidateQueries({ queryKey: ['plans'] })
       void queryClient.invalidateQueries({ queryKey: ['plans', 'detail', planId] })
+    },
+  })
+}
+
+export function useTogglePlanStar(planId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, isStarred }: { userId: string; isStarred: boolean }) =>
+      isStarred ? unstarPlan(userId, planId) : starPlan(userId, planId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['plans'] })
     },
   })
 }
