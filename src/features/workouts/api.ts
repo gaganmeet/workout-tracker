@@ -1,14 +1,19 @@
 import { supabase } from '@/lib/supabase/client'
-import type { Exercise, WorkoutExercise, WorkoutSession, WorkoutSet } from '@/types/domain'
+import type { Exercise, Gym, WorkoutExercise, WorkoutSession, WorkoutSet } from '@/types/domain'
 
 export type SetRow = WorkoutSet
 export type WorkoutExerciseWithDetails = WorkoutExercise & { exercises: Exercise; sets: SetRow[] }
-export type SessionDetail = WorkoutSession & { workout_exercises: WorkoutExerciseWithDetails[] }
+export type GymRef = Pick<Gym, 'id' | 'name'> | null
+export type SessionDetail = WorkoutSession & {
+  workout_exercises: WorkoutExerciseWithDetails[]
+  gyms: GymRef
+}
+export type SessionSummary = WorkoutSession & { gyms: GymRef }
 
 export async function fetchSessionDetail(sessionId: string): Promise<SessionDetail | null> {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .select('*, workout_exercises(*, exercises(*), sets(*))')
+    .select('*, workout_exercises(*, exercises(*), sets(*)), gyms(id, name)')
     .eq('id', sessionId)
     .order('exercise_order', { referencedTable: 'workout_exercises' })
     .order('set_order', { referencedTable: 'workout_exercises.sets' })
@@ -17,14 +22,14 @@ export async function fetchSessionDetail(sessionId: string): Promise<SessionDeta
   return data as unknown as SessionDetail | null
 }
 
-export async function fetchSessionHistory(userId: string): Promise<WorkoutSession[]> {
+export async function fetchSessionHistory(userId: string): Promise<SessionSummary[]> {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .select('*')
+    .select('*, gyms(id, name)')
     .eq('user_id', userId)
     .order('started_at', { ascending: false })
   if (error) throw error
-  return data
+  return data as unknown as SessionSummary[]
 }
 
 interface PlanDayExerciseSeed {
@@ -37,6 +42,7 @@ interface PlanDayExerciseSeed {
 export async function createSessionFromPlanDay(
   userId: string,
   planDayId: string,
+  gymId: string | null,
 ): Promise<string> {
   const { data: dayExercises, error: dayError } = await supabase
     .from('plan_day_exercises')
@@ -54,7 +60,7 @@ export async function createSessionFromPlanDay(
 
   const { data: session, error: sessionError } = await supabase
     .from('workout_sessions')
-    .insert({ user_id: userId, plan_day_id: planDayId, name: planDay.name })
+    .insert({ user_id: userId, plan_day_id: planDayId, name: planDay.name, gym_id: gymId })
     .select('id')
     .single()
   if (sessionError) throw sessionError
@@ -93,14 +99,19 @@ export async function createSessionFromPlanDay(
   return session.id
 }
 
-export async function createAdHocSession(userId: string): Promise<string> {
+export async function createAdHocSession(userId: string, gymId: string | null): Promise<string> {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .insert({ user_id: userId, name: 'Ad-hoc Workout' })
+    .insert({ user_id: userId, name: 'Ad-hoc Workout', gym_id: gymId })
     .select('id')
     .single()
   if (error) throw error
   return data.id
+}
+
+export async function updateSessionGym(sessionId: string, gymId: string | null): Promise<void> {
+  const { error } = await supabase.from('workout_sessions').update({ gym_id: gymId }).eq('id', sessionId)
+  if (error) throw error
 }
 
 export async function addWorkoutExercise(
@@ -190,6 +201,10 @@ export interface PreviousSet {
 // Most recent OTHER session where this user logged this exercise, ordered
 // by set_order, so a given set row's index lines up with "the same set last
 // time" -- used to show last time's numbers as placeholders while logging.
+// When the current session has a gym, prefer the most recent session at that
+// SAME gym first (different gyms can mean different machines/plates, so a
+// cross-gym "last time" can be misleadingly off) and only fall back to the
+// most recent session regardless of gym if there's no history there yet.
 //
 // Queries FROM workout_sessions (not workout_exercises) so `.order()` sorts
 // by that table's own started_at column directly. Ordering via
@@ -197,12 +212,13 @@ export interface PreviousSet {
 // resource -- it does not drive which row a top-level `.limit()` keeps, so
 // querying from the child table with the parent embedded silently returned
 // an arbitrary session instead of the most recent one.
-export async function fetchPreviousSets(
+async function findPreviousSessionExercise(
   userId: string,
   exerciseId: string,
   excludeSessionId: string,
-): Promise<PreviousSet[]> {
-  const { data: previousSessions, error: sessionError } = await supabase
+  gymId: string | null,
+) {
+  let query = supabase
     .from('workout_sessions')
     .select('workout_exercises!inner(id, exercise_id)')
     .eq('user_id', userId)
@@ -210,7 +226,24 @@ export async function fetchPreviousSets(
     .neq('id', excludeSessionId)
     .order('started_at', { ascending: false })
     .limit(1)
-  if (sessionError) throw sessionError
+  if (gymId) query = query.eq('gym_id', gymId)
+  const { data, error } = await query
+  if (error) throw error
+  return data
+}
+
+export async function fetchPreviousSets(
+  userId: string,
+  exerciseId: string,
+  excludeSessionId: string,
+  gymId: string | null,
+): Promise<PreviousSet[]> {
+  let previousSessions = gymId
+    ? await findPreviousSessionExercise(userId, exerciseId, excludeSessionId, gymId)
+    : []
+  if (!previousSessions || previousSessions.length === 0) {
+    previousSessions = await findPreviousSessionExercise(userId, exerciseId, excludeSessionId, null)
+  }
   if (!previousSessions || previousSessions.length === 0) return []
 
   const previousWorkoutExerciseId = previousSessions[0].workout_exercises[0].id

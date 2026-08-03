@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,6 +25,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useAuth } from '@/features/auth/AuthContext'
+import { useCreateGym, useDeleteGym, useGyms } from '@/features/gyms/hooks'
 import { useDeleteOwnAccount, useUpdatePassword, useUpdateWeightUnit } from '../hooks'
 import type { WeightUnit } from '@/types/domain'
 
@@ -70,6 +72,83 @@ function WeightUnitSection() {
             <SelectItem value="lb">lbs</SelectItem>
           </SelectContent>
         </Select>
+      </CardContent>
+    </Card>
+  )
+}
+
+function GymsSection() {
+  const { profile } = useAuth()
+  const { data: gyms } = useGyms(profile?.id)
+  const createGym = useCreateGym()
+  const deleteGym = useDeleteGym(profile?.id)
+  const [newName, setNewName] = useState('')
+
+  async function handleAdd() {
+    if (!profile || !newName.trim()) return
+    try {
+      await createGym.mutateAsync({ ownerId: profile.id, name: newName })
+      setNewName('')
+      toast.success('Gym added')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add gym')
+    }
+  }
+
+  async function handleDelete(gymId: string) {
+    if (!confirm('Remove this gym? Past workouts tagged with it will just show no gym.')) return
+    try {
+      await deleteGym.mutateAsync(gymId)
+      toast.success('Gym removed')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to remove gym')
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Gyms</CardTitle>
+        <CardDescription>
+          Tag a workout with the gym you're at so weight placeholders and progress can account for
+          different machines/plates across locations.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {gyms?.map((gym) => (
+          <div key={gym.id} className="flex items-center justify-between gap-2">
+            <span className="text-sm">{gym.name}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              disabled={deleteGym.isPending}
+              onClick={() => void handleDelete(gym.id)}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        ))}
+        {!gyms?.length && <p className="text-muted-foreground text-sm">No gyms added yet.</p>}
+        <div className="flex gap-2">
+          <Input
+            value={newName}
+            onChange={(event) => setNewName(event.target.value)}
+            placeholder="e.g. Gold's Gym"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') void handleAdd()
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            disabled={createGym.isPending || !newName.trim()}
+            onClick={() => void handleAdd()}
+          >
+            Add
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
@@ -213,6 +292,7 @@ export function SettingsPage() {
     <div className="space-y-4 p-4">
       <h1 className="text-xl font-semibold">Settings</h1>
       <WeightUnitSection />
+      <GymsSection />
       <ChangePasswordSection />
       <DeleteAccountSection />
     </div>

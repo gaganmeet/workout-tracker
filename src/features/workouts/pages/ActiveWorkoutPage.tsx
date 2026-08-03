@@ -106,6 +106,7 @@ export function ActiveWorkoutPage() {
             workoutExercise={workoutExercise}
             userId={session.user_id}
             sessionId={sessionId!}
+            gymId={session.gym_id}
             onAddSet={() =>
               addSet.mutate({
                 workoutExerciseId: workoutExercise.id,

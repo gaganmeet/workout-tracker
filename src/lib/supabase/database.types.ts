@@ -176,6 +176,35 @@ export type Database = {
           },
         ]
       }
+      gyms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gyms_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_assignments: {
         Row: {
           active: boolean
@@ -482,6 +511,7 @@ export type Database = {
         Row: {
           completed_at: string | null
           created_at: string
+          gym_id: string | null
           id: string
           name: string | null
           notes: string | null
@@ -492,6 +522,7 @@ export type Database = {
         Insert: {
           completed_at?: string | null
           created_at?: string
+          gym_id?: string | null
           id?: string
           name?: string | null
           notes?: string | null
@@ -502,6 +533,7 @@ export type Database = {
         Update: {
           completed_at?: string | null
           created_at?: string
+          gym_id?: string | null
           id?: string
           name?: string | null
           notes?: string | null
@@ -510,6 +542,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workout_sessions_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "workout_sessions_plan_day_id_fkey"
             columns: ["plan_day_id"]

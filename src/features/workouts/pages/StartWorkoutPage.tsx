@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
 import { useAuth } from '@/features/auth/AuthContext'
+import { GymSelect } from '@/features/gyms/components/GymSelect'
 import { useCreateAdHocSession, useCreateSessionFromPlanDay } from '../hooks'
 
 export function StartWorkoutPage() {
@@ -13,39 +15,20 @@ export function StartWorkoutPage() {
   const navigate = useNavigate()
   const createFromPlanDay = useCreateSessionFromPlanDay()
   const createAdHoc = useCreateAdHocSession()
-  const [starting, setStarting] = useState(false)
-  const startedRef = useRef(false)
+  const [gymId, setGymId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!planDayId || !profile || startedRef.current) return
-    startedRef.current = true
-    setStarting(true)
-    createFromPlanDay.mutate(
-      { userId: profile.id, planDayId },
-      {
-        onSuccess: (sessionId) => navigate(`/app/workout/active/${sessionId}`, { replace: true }),
-        onError: (error) => {
-          toast.error(error instanceof Error ? error.message : 'Failed to start workout')
-          setStarting(false)
-        },
-      },
-    )
-  }, [planDayId, profile, createFromPlanDay, navigate])
+  const starting = createFromPlanDay.isPending || createAdHoc.isPending
 
-  async function startAdHoc() {
+  async function handleStart() {
     if (!profile) return
-    setStarting(true)
     try {
-      const sessionId = await createAdHoc.mutateAsync(profile.id)
+      const sessionId = planDayId
+        ? await createFromPlanDay.mutateAsync({ userId: profile.id, planDayId, gymId })
+        : await createAdHoc.mutateAsync({ userId: profile.id, gymId })
       navigate(`/app/workout/active/${sessionId}`, { replace: true })
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to start workout')
-      setStarting(false)
     }
-  }
-
-  if (planDayId) {
-    return <p className="text-muted-foreground p-4 text-sm">Starting workout...</p>
   }
 
   return (
@@ -53,20 +36,31 @@ export function StartWorkoutPage() {
       <h1 className="text-xl font-semibold">Start a workout</h1>
       <Card>
         <CardHeader>
-          <CardTitle>Ad-hoc workout</CardTitle>
+          <CardTitle>{planDayId ? 'Ready to train' : 'Ad-hoc workout'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-muted-foreground text-sm">
-            Start with a blank workout and add exercises as you go.
-          </p>
-          <Button onClick={() => void startAdHoc()} disabled={starting}>
-            {starting ? 'Starting...' : 'Start ad-hoc workout'}
+          {!planDayId && (
+            <p className="text-muted-foreground text-sm">
+              Start with a blank workout and add exercises as you go.
+            </p>
+          )}
+          <div>
+            <Label>Gym (optional)</Label>
+            <p className="text-muted-foreground mb-1 text-xs">
+              Tagging a gym helps last-time placeholders reflect the machines/plates there.
+            </p>
+            <GymSelect ownerId={profile!.id} value={gymId} onChange={setGymId} />
+          </div>
+          <Button onClick={() => void handleStart()} disabled={starting}>
+            {starting ? 'Starting...' : planDayId ? 'Start workout' : 'Start ad-hoc workout'}
           </Button>
         </CardContent>
       </Card>
-      <p className="text-muted-foreground text-sm">
-        To start from a plan, open a plan from the Plans tab and tap "Start" on a day.
-      </p>
+      {!planDayId && (
+        <p className="text-muted-foreground text-sm">
+          To start from a plan, open a plan and tap "Start" on a day.
+        </p>
+      )}
     </div>
   )
 }

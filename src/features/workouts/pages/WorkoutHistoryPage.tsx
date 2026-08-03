@@ -55,10 +55,11 @@ export function WorkoutHistoryPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex items-center gap-2">
               <p className="text-muted-foreground text-sm">
                 {format(new Date(session.started_at), 'PPP p')}
               </p>
+              {session.gyms && <Badge variant="outline">{session.gyms.name}</Badge>}
             </CardContent>
           </Card>
         ))}

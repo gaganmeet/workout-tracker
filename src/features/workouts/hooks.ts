@@ -10,6 +10,7 @@ import {
   fetchSessionDetail,
   fetchSessionHistory,
   finishSession,
+  updateSessionGym,
   updateSet,
   updateWorkoutExerciseNotes,
   type SetPatch,
@@ -33,14 +34,33 @@ export function useSessionHistory(userId: string | undefined) {
 
 export function useCreateSessionFromPlanDay() {
   return useMutation({
-    mutationFn: ({ userId, planDayId }: { userId: string; planDayId: string }) =>
-      createSessionFromPlanDay(userId, planDayId),
+    mutationFn: ({
+      userId,
+      planDayId,
+      gymId,
+    }: {
+      userId: string
+      planDayId: string
+      gymId: string | null
+    }) => createSessionFromPlanDay(userId, planDayId, gymId),
   })
 }
 
 export function useCreateAdHocSession() {
   return useMutation({
-    mutationFn: (userId: string) => createAdHocSession(userId),
+    mutationFn: ({ userId, gymId }: { userId: string; gymId: string | null }) =>
+      createAdHocSession(userId, gymId),
+  })
+}
+
+export function useUpdateSessionGym(sessionId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (gymId: string | null) => updateSessionGym(sessionId, gymId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['workoutSessions', sessionId] })
+      void queryClient.invalidateQueries({ queryKey: ['workoutSessions', 'history'] })
+    },
   })
 }
 
@@ -112,10 +132,11 @@ export function usePreviousSets(
   userId: string | undefined,
   exerciseId: string | undefined,
   excludeSessionId: string | undefined,
+  gymId: string | null,
 ) {
   return useQuery({
-    queryKey: ['workoutSessions', 'previousSets', userId, exerciseId, excludeSessionId],
-    queryFn: () => fetchPreviousSets(userId!, exerciseId!, excludeSessionId!),
+    queryKey: ['workoutSessions', 'previousSets', userId, exerciseId, excludeSessionId, gymId],
+    queryFn: () => fetchPreviousSets(userId!, exerciseId!, excludeSessionId!, gymId),
     enabled: !!userId && !!exerciseId && !!excludeSessionId,
   })
 }

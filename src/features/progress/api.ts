@@ -30,16 +30,22 @@ function estimateOneRepMax(weight: number, reps: number): number {
   return weight * (1 + reps / 30)
 }
 
+export type GymFilter = 'all' | 'none' | string
+
 export async function fetchExerciseProgress(
   userId: string,
   exerciseId: string,
+  gymFilter: GymFilter,
 ): Promise<SessionPoint[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from('workout_sessions')
     .select('id, started_at, workout_exercises!inner(sets(weight, reps, completed, is_warmup))')
     .eq('user_id', userId)
     .eq('workout_exercises.exercise_id', exerciseId)
     .order('started_at', { ascending: true })
+  if (gymFilter === 'none') query = query.is('gym_id', null)
+  else if (gymFilter !== 'all') query = query.eq('gym_id', gymFilter)
+  const { data, error } = await query
   if (error) throw error
 
   const sessions = data as unknown as RawSession[]

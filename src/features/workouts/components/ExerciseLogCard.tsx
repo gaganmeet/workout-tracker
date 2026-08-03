@@ -64,6 +64,7 @@ export function ExerciseLogCard({
   workoutExercise,
   userId,
   sessionId,
+  gymId,
   onAddSet,
   onUpdateSet,
   onDeleteSet,
@@ -72,12 +73,13 @@ export function ExerciseLogCard({
   workoutExercise: WorkoutExerciseWithDetails
   userId: string
   sessionId: string
+  gymId: string | null
   onAddSet: () => void
   onUpdateSet: (setId: string, patch: SetPatch) => void
   onDeleteSet: (setId: string) => void
   onUpdateNotes: (notes: string) => void
 }) {
-  const { data: previousSets } = usePreviousSets(userId, workoutExercise.exercise_id, sessionId)
+  const { data: previousSets } = usePreviousSets(userId, workoutExercise.exercise_id, sessionId, gymId)
 
   return (
     <Card>

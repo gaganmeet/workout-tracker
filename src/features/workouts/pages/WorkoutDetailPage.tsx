@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/AuthContext'
+import { GymSelect } from '@/features/gyms/components/GymSelect'
 import { WorkoutExerciseNotes } from '../components/WorkoutExerciseNotes'
 import { ExerciseProgressSection } from '../components/ExerciseProgressSection'
-import { useDeleteSession, useSessionDetail } from '../hooks'
+import { useDeleteSession, useSessionDetail, useUpdateSessionGym } from '../hooks'
 
 export function WorkoutDetailPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -15,6 +16,7 @@ export function WorkoutDetailPage() {
   const { profile } = useAuth()
   const navigate = useNavigate()
   const deleteSession = useDeleteSession()
+  const updateGym = useUpdateSessionGym(sessionId!)
 
   if (isLoading) {
     return <p className="text-muted-foreground p-4 text-sm">Loading...</p>
@@ -38,6 +40,15 @@ export function WorkoutDetailPage() {
     }
   }
 
+  async function handleUpdateGym(gymId: string | null) {
+    try {
+      await updateGym.mutateAsync(gymId)
+      toast.success('Gym updated')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update gym')
+    }
+  }
+
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between gap-2">
@@ -46,6 +57,7 @@ export function WorkoutDetailPage() {
           <p className="text-muted-foreground text-sm">
             {format(new Date(session.started_at), 'PPP p')}
           </p>
+          {!isOwnSession && session.gyms && <Badge variant="outline">{session.gyms.name}</Badge>}
         </div>
         {isOwnSession && (
           <div className="flex gap-2">
@@ -65,6 +77,17 @@ export function WorkoutDetailPage() {
           </div>
         )}
       </div>
+
+      {isOwnSession && (
+        <div className="max-w-xs">
+          <p className="text-muted-foreground mb-1 text-xs font-medium">Gym</p>
+          <GymSelect
+            ownerId={session.user_id}
+            value={session.gym_id}
+            onChange={(gymId) => void handleUpdateGym(gymId)}
+          />
+        </div>
+      )}
 
       <div className="space-y-3">
         {session.workout_exercises.map((workoutExercise) => (
