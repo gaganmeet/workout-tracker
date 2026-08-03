@@ -224,12 +224,13 @@ function DeleteAccountSection() {
   const [open, setOpen] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const deleteAccount = useDeleteOwnAccount()
-  const { signOut } = useAuth()
+  const { profile, signOut } = useAuth()
   const navigate = useNavigate()
 
   async function handleDelete() {
+    if (!profile) return
     try {
-      await deleteAccount.mutateAsync()
+      await deleteAccount.mutateAsync(profile.id)
       await signOut()
       toast.success('Account deleted')
       navigate('/login', { replace: true })

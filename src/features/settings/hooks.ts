@@ -17,6 +17,6 @@ export function useUpdatePassword() {
 
 export function useDeleteOwnAccount() {
   return useMutation({
-    mutationFn: () => deleteOwnAccount(),
+    mutationFn: (userId: string) => deleteOwnAccount(userId),
   })
 }
