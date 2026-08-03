@@ -46,8 +46,7 @@ export default defineConfig(({ mode }) => {
                     handler: 'NetworkOnly' as const,
                   },
                   {
-                    urlPattern: ({ url }: { url: URL }) =>
-                      url.host === supabaseHost && url.pathname.startsWith('/rest/'),
+                    urlPattern: new RegExp(`^https://${supabaseHost}/rest/.*`),
                     handler: 'NetworkFirst' as const,
                     options: {
                       cacheName: 'supabase-api',
