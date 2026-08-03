@@ -2,7 +2,10 @@ import { supabase } from '@/lib/supabase/client'
 import type { Profile } from '@/types/domain'
 
 const AVATAR_BUCKET = 'avatars'
-const MAX_AVATAR_BYTES = 5 * 1024 * 1024
+const MAX_SOURCE_BYTES = 25 * 1024 * 1024 // sanity cap before we even try to decode
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024 // backstop after compression, should basically never trip
+const MAX_AVATAR_DIMENSION = 512
+const JPEG_QUALITY = 0.85
 
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
@@ -18,16 +21,54 @@ export async function updateProfileBio(userId: string, bio: string): Promise<voi
   if (error) throw error
 }
 
+// Resize to avatar-appropriate dimensions and re-encode as JPEG using the
+// Canvas API -- no extra dependency needed for what a few lines of native
+// browser APIs already do. A phone photo (often 3-5MB) routinely comes out
+// under 100KB at 512px, so the old flat "reject over 5MB" limit was mostly
+// just rejecting normal photos rather than actually protecting anything.
+async function compressImage(file: File): Promise<Blob> {
+  const bitmap = await createImageBitmap(file)
+  const scale = Math.min(1, MAX_AVATAR_DIMENSION / Math.max(bitmap.width, bitmap.height))
+  const width = Math.round(bitmap.width * scale)
+  const height = Math.round(bitmap.height * scale)
+
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Failed to compress image')
+  // Flatten transparency onto white -- avatars render as opaque circles, and
+  // converting a transparent PNG straight to JPEG would otherwise turn
+  // transparent pixels black.
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+  ctx.drawImage(bitmap, 0, 0, width, height)
+  bitmap.close()
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('Failed to compress image'))),
+      'image/jpeg',
+      JPEG_QUALITY,
+    )
+  })
+}
+
 // Path is fixed to the user's own id (no extension -- Storage tracks
 // content-type from the upload itself), so upsert:true always overwrites
 // the previous avatar in place instead of accumulating multiple objects.
 export async function uploadAvatar(userId: string, file: File): Promise<string> {
-  if (file.size > MAX_AVATAR_BYTES) {
-    throw new Error('Image must be under 5MB')
+  if (file.size > MAX_SOURCE_BYTES) {
+    throw new Error('Image is too large')
   }
+  const compressed = await compressImage(file)
+  if (compressed.size > MAX_AVATAR_BYTES) {
+    throw new Error('Image is too large even after compression')
+  }
+
   const { error: uploadError } = await supabase.storage
     .from(AVATAR_BUCKET)
-    .upload(userId, file, { upsert: true, contentType: file.type })
+    .upload(userId, compressed, { upsert: true, contentType: 'image/jpeg' })
   if (uploadError) throw uploadError
 
   const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(userId)
