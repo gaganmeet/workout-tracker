@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -30,8 +31,14 @@ export function TopBar() {
 
   return (
     <header className="border-border bg-background sticky top-0 z-10 flex h-14 items-center justify-between border-b px-4">
-      <Link to={profile?.role === 'coach' ? '/coach/dashboard' : '/app/dashboard'} className="font-semibold">
+      <Link
+        to={profile?.role === 'coach' ? '/coach/dashboard' : '/app/dashboard'}
+        className="flex items-center gap-2 font-semibold"
+      >
         SwoleBalli
+        <Badge variant="secondary" className="text-[10px] font-medium uppercase tracking-wide">
+          Alpha
+        </Badge>
       </Link>
       <div className="flex items-center gap-1">
         <ModeToggle />
