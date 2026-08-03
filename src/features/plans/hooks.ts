@@ -5,7 +5,9 @@ import {
   fetchAssignedPlans,
   fetchOwnPlans,
   fetchPlanDetail,
+  fetchPublicPlans,
   savePlan,
+  togglePlanPublic,
 } from './api'
 import type { SavePlanPayload } from './types'
 
@@ -22,6 +24,13 @@ export function useAssignedPlans(clientId: string | undefined) {
     queryKey: ['plans', 'assigned', clientId],
     queryFn: () => fetchAssignedPlans(clientId!),
     enabled: !!clientId,
+  })
+}
+
+export function usePublicPlans() {
+  return useQuery({
+    queryKey: ['plans', 'public'],
+    queryFn: fetchPublicPlans,
   })
 }
 
@@ -50,6 +59,18 @@ export function useDuplicatePlan() {
     mutationFn: (planId: string) => duplicatePlan(planId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['plans'] })
+    },
+  })
+}
+
+export function useTogglePlanPublic() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ planId, isPublic }: { planId: string; isPublic: boolean }) =>
+      togglePlanPublic(planId, isPublic),
+    onSuccess: (_data, { planId }) => {
+      void queryClient.invalidateQueries({ queryKey: ['plans'] })
+      void queryClient.invalidateQueries({ queryKey: ['plans', 'detail', planId] })
     },
   })
 }

@@ -19,6 +19,7 @@ export interface DraftPlan {
   id?: string
   name: string
   description: string
+  isPublic: boolean
   days: DraftDay[]
 }
 
@@ -26,6 +27,7 @@ export interface SavePlanPayload {
   id?: string
   name: string
   description?: string
+  is_public?: boolean
   assign_client_id?: string
   days: {
     name: string
@@ -47,6 +49,7 @@ export function draftToPayload(draft: DraftPlan, assignClientId?: string): SaveP
     id: draft.id,
     name: draft.name,
     description: draft.description || undefined,
+    is_public: draft.isPublic,
     assign_client_id: assignClientId,
     days: draft.days.map((day, dayIndex) => ({
       name: day.name,

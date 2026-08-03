@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/features/auth/AuthContext'
-import { useAssignedPlans, useDuplicatePlan, useOwnPlans } from '../hooks'
+import { useAssignedPlans, useDuplicatePlan, useOwnPlans, usePublicPlans } from '../hooks'
 import { PlanCard } from '../components/PlanCard'
 
 export function PlansListPage() {
@@ -12,6 +12,7 @@ export function PlansListPage() {
   const navigate = useNavigate()
   const { data: ownPlans, isLoading: loadingOwn } = useOwnPlans(profile?.id)
   const { data: assignedPlans, isLoading: loadingAssigned } = useAssignedPlans(profile?.id)
+  const { data: publicPlans, isLoading: loadingPublic } = usePublicPlans()
   const duplicatePlan = useDuplicatePlan()
 
   async function handleDuplicate(planId: string) {
@@ -39,6 +40,7 @@ export function PlansListPage() {
         <TabsList>
           <TabsTrigger value="mine">My Plans</TabsTrigger>
           <TabsTrigger value="assigned">From Coach</TabsTrigger>
+          <TabsTrigger value="library">Public Library</TabsTrigger>
         </TabsList>
         <TabsContent value="mine" className="space-y-2">
           {loadingOwn && <p className="text-muted-foreground text-sm">Loading...</p>}
@@ -66,6 +68,22 @@ export function PlansListPage() {
               plan={assignment.plans}
               onClick={() => navigate(`/app/plans/${assignment.plan_id}`)}
               onDuplicate={() => void handleDuplicate(assignment.plan_id)}
+              duplicating={duplicatePlan.isPending}
+            />
+          ))}
+        </TabsContent>
+        <TabsContent value="library" className="space-y-2">
+          {loadingPublic && <p className="text-muted-foreground text-sm">Loading...</p>}
+          {!loadingPublic && publicPlans?.length === 0 && (
+            <p className="text-muted-foreground text-sm">No public plans yet.</p>
+          )}
+          {publicPlans?.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              ownerLabel={plan.profiles?.display_name ?? plan.profiles?.username ?? 'someone'}
+              onClick={() => navigate(`/app/plans/${plan.id}`)}
+              onDuplicate={() => void handleDuplicate(plan.id)}
               duplicating={duplicatePlan.isPending}
             />
           ))}

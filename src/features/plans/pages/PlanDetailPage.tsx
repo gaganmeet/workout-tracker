@@ -1,11 +1,12 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/features/auth/AuthContext'
 import { TutorialVideoLink } from '@/features/exercises/components/TutorialVideoLink'
-import { usePlanDetail, useDeletePlan } from '../hooks'
+import { usePlanDetail, useDeletePlan, useDuplicatePlan, useTogglePlanPublic } from '../hooks'
 import { PlanExerciseNotes } from '../components/PlanExerciseNotes'
 
 export function PlanDetailPage({ basePath = '/app/plans' }: { basePath?: string } = {}) {
@@ -13,6 +14,8 @@ export function PlanDetailPage({ basePath = '/app/plans' }: { basePath?: string 
   const { profile } = useAuth()
   const { data: plan, isLoading } = usePlanDetail(planId)
   const deletePlan = useDeletePlan()
+  const togglePublic = useTogglePlanPublic()
+  const duplicatePlan = useDuplicatePlan()
   const navigate = useNavigate()
 
   if (isLoading) {
@@ -42,15 +45,57 @@ export function PlanDetailPage({ basePath = '/app/plans' }: { basePath?: string 
     }
   }
 
+  async function handleTogglePublic() {
+    try {
+      await togglePublic.mutateAsync({ planId: plan!.id, isPublic: !plan!.is_public })
+      toast.success(plan!.is_public ? 'Plan is now private' : 'Plan is now public')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update plan')
+    }
+  }
+
+  async function handleCopyLink() {
+    const shareUrl = `${window.location.origin}/app/plans/${plan!.id}`
+    await navigator.clipboard.writeText(shareUrl)
+    toast.success('Share link copied', { description: shareUrl })
+  }
+
+  async function handleAddToMyPlans() {
+    try {
+      const newPlanId = await duplicatePlan.mutateAsync(plan!.id)
+      toast.success('Added to your plans')
+      navigate(`/app/plans/${newPlanId}/edit`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add plan')
+    }
+  }
+
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">{plan.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold">{plan.name}</h1>
+            {plan.is_public && <Badge variant="secondary">Public</Badge>}
+          </div>
           {plan.description && <p className="text-muted-foreground text-sm">{plan.description}</p>}
         </div>
-        {isOwner && (
-          <div className="flex gap-2">
+        {isOwner ? (
+          <div className="flex flex-wrap justify-end gap-2">
+            {plan.is_public && (
+              <Button variant="outline" size="sm" onClick={() => void handleCopyLink()}>
+                <Copy className="mr-1 size-4" />
+                Copy link
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={togglePublic.isPending}
+              onClick={() => void handleTogglePublic()}
+            >
+              {plan.is_public ? 'Make private' : 'Make public'}
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to={`${basePath}/${plan.id}/edit`}>Edit</Link>
             </Button>
@@ -58,6 +103,10 @@ export function PlanDetailPage({ basePath = '/app/plans' }: { basePath?: string 
               Delete
             </Button>
           </div>
+        ) : (
+          <Button size="sm" disabled={duplicatePlan.isPending} onClick={() => void handleAddToMyPlans()}>
+            {duplicatePlan.isPending ? 'Adding...' : 'Add to my plans'}
+          </Button>
         )}
       </div>
 

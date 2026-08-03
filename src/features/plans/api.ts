@@ -34,6 +34,24 @@ export async function fetchAssignedPlans(clientId: string): Promise<AssignedPlan
   return data as unknown as AssignedPlan[]
 }
 
+export type PublicPlan = PlanWithDays & { profiles: Pick<Profile, 'id' | 'display_name' | 'username'> | null }
+
+export async function fetchPublicPlans(): Promise<PublicPlan[]> {
+  const { data, error } = await supabase
+    .from('plans')
+    .select('*, profiles(id, display_name, username), plan_days(id, name, day_order)')
+    .eq('is_public', true)
+    .order('updated_at', { ascending: false })
+    .order('day_order', { referencedTable: 'plan_days' })
+  if (error) throw error
+  return data as unknown as PublicPlan[]
+}
+
+export async function togglePlanPublic(planId: string, isPublic: boolean): Promise<void> {
+  const { error } = await supabase.from('plans').update({ is_public: isPublic }).eq('id', planId)
+  if (error) throw error
+}
+
 export type PlanDayExerciseWithExercise = PlanDayExercise & { exercises: Exercise }
 export type PlanDayWithExercises = PlanDay & { plan_day_exercises: PlanDayExerciseWithExercise[] }
 export type PlanDetail = Plan & { plan_days: PlanDayWithExercises[] }

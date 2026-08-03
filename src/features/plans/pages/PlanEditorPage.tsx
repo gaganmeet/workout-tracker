@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { usePlanDetail, useSavePlan } from '../hooks'
 import { PlanDayEditor } from '../components/PlanDayEditor'
 import { draftToPayload, type DraftDay, type DraftPlan } from '../types'
@@ -20,7 +21,12 @@ export function PlanEditorPage({ assignClientId }: { assignClientId?: string } =
   const savePlan = useSavePlan()
   const navigate = useNavigate()
 
-  const [draft, setDraft] = useState<DraftPlan>({ name: '', description: '', days: [emptyDay()] })
+  const [draft, setDraft] = useState<DraftPlan>({
+    name: '',
+    description: '',
+    isPublic: false,
+    days: [emptyDay()],
+  })
 
   useEffect(() => {
     if (existingPlan) {
@@ -28,6 +34,7 @@ export function PlanEditorPage({ assignClientId }: { assignClientId?: string } =
         id: existingPlan.id,
         name: existingPlan.name,
         description: existingPlan.description ?? '',
+        isPublic: existingPlan.is_public,
         days: existingPlan.plan_days.map((day) => ({
           tempId: day.id,
           name: day.name,
@@ -68,7 +75,17 @@ export function PlanEditorPage({ assignClientId }: { assignClientId?: string } =
     }
     try {
       const savedId = await savePlan.mutateAsync(draftToPayload(draft, assignClientId))
-      toast.success('Plan saved')
+      if (draft.isPublic) {
+        const shareUrl = `${window.location.origin}/app/plans/${savedId}`
+        try {
+          await navigator.clipboard.writeText(shareUrl)
+          toast.success('Plan saved and public', { description: `Share link copied: ${shareUrl}` })
+        } catch {
+          toast.success('Plan saved and public', { description: `Share link: ${shareUrl}` })
+        }
+      } else {
+        toast.success('Plan saved')
+      }
       navigate(assignClientId ? `/coach/clients/${assignClientId}` : `/app/plans/${savedId}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to save plan')
@@ -100,6 +117,16 @@ export function PlanEditorPage({ assignClientId }: { assignClientId?: string } =
             onChange={(event) => setDraft((prev) => ({ ...prev, description: event.target.value }))}
             placeholder="Optional"
           />
+        </div>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="plan-is-public"
+            checked={draft.isPublic}
+            onCheckedChange={(checked) => setDraft((prev) => ({ ...prev, isPublic: checked === true }))}
+          />
+          <Label htmlFor="plan-is-public" className="font-normal">
+            Make this plan public (anyone can view it and add it to their own plans)
+          </Label>
         </div>
       </div>
 
