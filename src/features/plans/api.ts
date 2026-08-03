@@ -3,28 +3,33 @@ import type { Json } from '@/lib/supabase/database.types'
 import type { Exercise, Plan, PlanDay, PlanDayExercise, Profile } from '@/types/domain'
 import type { SavePlanPayload } from './types'
 
-export async function fetchOwnPlans(ownerId: string): Promise<Plan[]> {
+export type PlanDaySummary = Pick<PlanDay, 'id' | 'name' | 'day_order'>
+export type PlanWithDays = Plan & { plan_days: PlanDaySummary[] }
+
+export async function fetchOwnPlans(ownerId: string): Promise<PlanWithDays[]> {
   const { data, error } = await supabase
     .from('plans')
-    .select('*')
+    .select('*, plan_days(id, name, day_order)')
     .eq('owner_id', ownerId)
     .order('updated_at', { ascending: false })
+    .order('day_order', { referencedTable: 'plan_days' })
   if (error) throw error
-  return data
+  return data as unknown as PlanWithDays[]
 }
 
 export interface AssignedPlan {
   plan_id: string
   active: boolean
-  plans: Plan & { profiles: Pick<Profile, 'id' | 'display_name' | 'username'> }
+  plans: PlanWithDays & { profiles: Pick<Profile, 'id' | 'display_name' | 'username'> | null }
 }
 
 export async function fetchAssignedPlans(clientId: string): Promise<AssignedPlan[]> {
   const { data, error } = await supabase
     .from('plan_assignments')
-    .select('plan_id, active, plans(*, profiles(id, display_name, username))')
+    .select('plan_id, active, plans(*, profiles(id, display_name, username), plan_days(id, name, day_order))')
     .eq('client_id', clientId)
     .eq('active', true)
+    .order('day_order', { referencedTable: 'plans.plan_days' })
   if (error) throw error
   return data as unknown as AssignedPlan[]
 }

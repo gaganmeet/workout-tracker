@@ -52,6 +52,7 @@ export function AthleteDashboardPage() {
             key={plan.id}
             plan={plan}
             ownerLabel="You"
+            startableDays={plan.plan_days}
             onClick={() => navigate(`/app/plans/${plan.id}`)}
           />
         ))}
@@ -59,7 +60,8 @@ export function AthleteDashboardPage() {
           <PlanCard
             key={assignment.plan_id}
             plan={assignment.plans}
-            ownerLabel={assignment.plans.profiles.display_name ?? assignment.plans.profiles.username}
+            ownerLabel={assignment.plans.profiles?.display_name ?? assignment.plans.profiles?.username ?? 'your coach'}
+            startableDays={assignment.plans.plan_days}
             onClick={() => navigate(`/app/plans/${assignment.plan_id}`)}
           />
         ))}
