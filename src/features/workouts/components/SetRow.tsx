@@ -29,7 +29,12 @@ export function SetRow({
   const [rpe, setRpe] = useState(set.rpe?.toString() ?? '')
 
   return (
-    <div className="flex items-center gap-2">
+    <div
+      className={cn(
+        'flex items-center gap-1.5 rounded-md p-1 transition-colors',
+        set.completed && 'bg-green-100 dark:bg-green-950/40',
+      )}
+    >
       <Button
         type="button"
         variant="ghost"
@@ -46,7 +51,7 @@ export function SetRow({
         type="number"
         inputMode="decimal"
         placeholder={previous?.weight != null ? String(previous.weight) : 'kg'}
-        className="h-9"
+        className="h-9 min-w-0 flex-[1.3] px-2"
         value={weight}
         onChange={(event) => setWeight(event.target.value)}
         onBlur={() => onUpdate({ weight: numberOrNull(weight) })}
@@ -55,7 +60,7 @@ export function SetRow({
         type="number"
         inputMode="numeric"
         placeholder={previous?.reps != null ? String(previous.reps) : 'reps'}
-        className="h-9"
+        className="h-9 min-w-0 flex-1 px-2"
         value={reps}
         onChange={(event) => setReps(event.target.value)}
         onBlur={() => onUpdate({ reps: numberOrNull(reps) })}
@@ -67,7 +72,7 @@ export function SetRow({
         min={0}
         max={10}
         step={0.5}
-        className="h-9"
+        className="h-9 min-w-0 flex-1 px-2"
         value={rpe}
         onChange={(event) => setRpe(event.target.value)}
         onBlur={() => onUpdate({ rpe: numberOrNull(rpe) })}

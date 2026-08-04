@@ -93,10 +93,10 @@ export function ExerciseLogCard({
       </CardHeader>
       <CardContent className="space-y-2">
         {workoutExercise.sets.length > 0 && (
-          <div className="text-muted-foreground flex gap-2 pl-7 text-xs">
-            <span className="flex-1">Weight</span>
-            <span className="flex-1">Reps</span>
-            <span className="flex-1">RPE</span>
+          <div className="text-muted-foreground flex gap-1.5 pl-[calc(2.25rem+0.25rem)] text-xs">
+            <span className="min-w-0 flex-[1.3] px-2">Weight</span>
+            <span className="min-w-0 flex-1 px-2">Reps</span>
+            <span className="min-w-0 flex-1 px-2">RPE</span>
             <span className="w-9" />
             <span className="w-9" />
           </div>
