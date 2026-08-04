@@ -53,6 +53,7 @@ export function SignUpPage() {
       email: values.email,
       password: values.password,
       options: {
+        emailRedirectTo: `${window.location.origin}/login`,
         data: {
           username: values.username,
           display_name: values.displayName,
