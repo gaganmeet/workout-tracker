@@ -23,6 +23,17 @@ dev-dist
 /blob-report/
 /playwright/.cache/
 
+# Android TWA (Play Store packaging) — never commit the signing keystore
+android/*.keystore
+android/*.jks
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/*.apk
+android/*.apk.idsig
+android/*.aab
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

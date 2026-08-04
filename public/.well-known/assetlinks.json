@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.gaganmeetbahri.swoleballi",
+      "sha256_cert_fingerprints": [
+        "F4:9E:04:B6:63:AB:D7:63:A4:B5:D0:0A:4F:C0:C2:C7:5E:91:AB:C9:68:14:53:FD:F0:59:94:C4:D7:D7:C1:4B"
+      ]
+    }
+  }
+]
