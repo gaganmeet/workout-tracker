@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom
 import { AppProviders } from '@/app/providers'
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext'
 import { RequireAuth } from '@/features/auth/RequireAuth'
+import { RequireGuest } from '@/features/auth/RequireGuest'
 import { RequireRole } from '@/features/auth/RequireRole'
 import { AppShell } from '@/components/layout/AppShell'
 import { ReloadPrompt } from '@/components/layout/ReloadPrompt'
@@ -114,8 +115,22 @@ function AppRoutes() {
     <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
-        <Route path="/login" element={<SignInPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+        <Route
+          path="/login"
+          element={
+            <RequireGuest>
+              <SignInPage />
+            </RequireGuest>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <RequireGuest>
+              <SignUpPage />
+            </RequireGuest>
+          }
+        />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
