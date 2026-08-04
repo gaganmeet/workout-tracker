@@ -9,6 +9,7 @@ import { AppShell } from '@/components/layout/AppShell'
 import { ReloadPrompt } from '@/components/layout/ReloadPrompt'
 import { OfflineBanner } from '@/components/layout/OfflineBanner'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage'
 
 const SignInPage = lazy(() => import('@/features/auth/pages/SignInPage').then((m) => ({ default: m.SignInPage })))
 const SignUpPage = lazy(() => import('@/features/auth/pages/SignUpPage').then((m) => ({ default: m.SignUpPage })))
@@ -133,8 +134,15 @@ function AppRoutes() {
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
-        <Route element={<RequireAuth><AthleteLayout /></RequireAuth>}>
+        <Route
+          element={
+            <RequireAuth>
+              <AthleteLayout />
+            </RequireAuth>
+          }
+        >
           <Route path="/app/dashboard" element={<AthleteDashboardPage />} />
           <Route path="/app/plans" element={<PlansListPage />} />
           <Route path="/app/plans/new" element={<PlanEditorPage />} />
@@ -152,16 +160,19 @@ function AppRoutes() {
           <Route path="/app/profile/:userId" element={<ProfilePage />} />
         </Route>
 
-        <Route element={<RequireAuth><CoachLayout /></RequireAuth>}>
+        <Route
+          element={
+            <RequireAuth>
+              <CoachLayout />
+            </RequireAuth>
+          }
+        >
           <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
           <Route path="/coach/requests" element={<PendingRequestsPage />} />
           <Route path="/coach/clients/:clientId" element={<ClientDetailPage />} />
           <Route path="/coach/clients/:clientId/sessions/:sessionId" element={<WorkoutDetailPage />} />
           <Route path="/coach/clients/:clientId/plans/new" element={<NewClientPlanPage />} />
-          <Route
-            path="/coach/clients/:clientId/plans/:planId"
-            element={<PlanDetailPage basePath="/coach/plans" />}
-          />
+          <Route path="/coach/clients/:clientId/plans/:planId" element={<PlanDetailPage basePath="/coach/plans" />} />
           <Route path="/coach/plans" element={<CoachPlansPage />} />
           <Route path="/coach/plans/new" element={<PlanEditorPage />} />
           <Route path="/coach/plans/:planId" element={<PlanDetailPage basePath="/coach/plans" />} />
