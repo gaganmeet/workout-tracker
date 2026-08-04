@@ -82,11 +82,19 @@ export function SetRow({
         size="icon"
         variant={set.completed ? 'default' : 'outline'}
         className={cn('size-9 shrink-0', set.completed && 'bg-green-600 hover:bg-green-700')}
+        aria-label={set.completed ? 'Mark set incomplete' : 'Mark set complete'}
         onClick={() => onUpdate({ completed: !set.completed })}
       >
         <Check className="size-4" />
       </Button>
-      <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0" onClick={onDelete}>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        className="size-9 shrink-0"
+        aria-label="Delete set"
+        onClick={onDelete}
+      >
         <Trash2 className="size-4" />
       </Button>
     </div>
