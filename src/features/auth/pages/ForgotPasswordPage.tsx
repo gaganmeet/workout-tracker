@@ -8,14 +8,8 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { AuthLayout } from '@/features/auth/AuthLayout'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -48,17 +42,15 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-6">
-      <Card className="w-full max-w-sm">
+    <AuthLayout>
+      <Card>
         <CardHeader>
           <CardTitle>Reset your password</CardTitle>
           <CardDescription>We'll email you a link to choose a new one.</CardDescription>
         </CardHeader>
         <CardContent>
           {sent ? (
-            <p className="text-muted-foreground text-sm">
-              Check your email for a password reset link.
-            </p>
+            <p className="text-muted-foreground text-sm">Check your email for a password reset link.</p>
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -88,6 +80,6 @@ export function ForgotPasswordPage() {
           </p>
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   )
 }

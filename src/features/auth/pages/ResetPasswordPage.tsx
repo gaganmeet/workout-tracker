@@ -8,14 +8,8 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { AuthLayout } from '@/features/auth/AuthLayout'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
 const schema = z
   .object({
@@ -75,8 +69,8 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-6">
-      <Card className="w-full max-w-sm">
+    <AuthLayout>
+      <Card>
         <CardHeader>
           <CardTitle>Choose a new password</CardTitle>
           <CardDescription>Enter a new password for your account.</CardDescription>
@@ -84,8 +78,8 @@ export function ResetPasswordPage() {
         <CardContent>
           {!ready ? (
             <p className="text-muted-foreground text-sm">
-              Verifying your reset link... if this doesn't update, the link may have expired --
-              request a new one from the sign-in page.
+              Verifying your reset link... if this doesn't update, the link may have expired -- request a new one from
+              the sign-in page.
             </p>
           ) : (
             <Form {...form}>
@@ -124,6 +118,6 @@ export function ResetPasswordPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   )
 }

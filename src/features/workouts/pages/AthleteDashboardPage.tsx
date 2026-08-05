@@ -16,15 +16,17 @@ export function AthleteDashboardPage() {
   return (
     <div className="space-y-4 p-4">
       <div>
-        <h1 className="text-xl font-semibold">Welcome back{profile ? `, ${profile.display_name ?? profile.username}` : ''}</h1>
+        <h1 className="text-xl font-semibold">
+          Welcome back{profile ? `, ${profile.display_name ?? profile.username}` : ''}
+        </h1>
         <p className="text-muted-foreground text-sm">Ready to train?</p>
       </div>
-      <Card>
+      <Card className="border-primary/30 from-primary/10 via-card to-card bg-gradient-to-br">
         <CardHeader>
           <CardTitle>Start a workout</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button asChild>
+          <Button asChild size="lg">
             <Link to="/app/workout/start">Start workout</Link>
           </Button>
         </CardContent>

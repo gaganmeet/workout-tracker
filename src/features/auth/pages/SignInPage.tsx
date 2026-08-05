@@ -8,14 +8,8 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { AuthLayout } from '@/features/auth/AuthLayout'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
 const signInSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -43,18 +37,14 @@ export function SignInPage() {
       return
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
 
     navigate(profile?.role === 'coach' ? '/coach/dashboard' : '/app/dashboard', { replace: true })
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-6">
-      <Card className="w-full max-w-sm">
+    <AuthLayout>
+      <Card>
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
           <CardDescription>Welcome back.</CardDescription>
@@ -109,6 +99,6 @@ export function SignInPage() {
           </p>
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   )
 }

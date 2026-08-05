@@ -28,23 +28,36 @@ export function BottomNav({ role }: { role: 'athlete' | 'coach' }) {
   const items = role === 'coach' ? coachItems : athleteItems
 
   return (
-    <nav className="border-border bg-background sticky bottom-0 z-10 flex h-16 items-stretch border-t">
-      {items.map((item) => (
-        <NavLink
-          key={item.label}
-          to={item.to}
-          end={item.end}
-          className={({ isActive }) =>
-            cn(
-              'flex flex-1 flex-col items-center justify-center gap-1 text-xs',
-              isActive ? 'text-foreground' : 'text-muted-foreground',
-            )
-          }
-        >
-          <item.icon className="size-5" />
-          {item.label}
-        </NavLink>
-      ))}
+    <nav className="border-border bg-background sticky bottom-0 z-10 border-t">
+      <div className="mx-auto flex h-16 max-w-2xl items-stretch">
+        {items.map((item) => (
+          <NavLink
+            key={item.label}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              cn(
+                'flex flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors',
+                isActive ? 'text-primary' : 'text-muted-foreground',
+              )
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <span
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-full transition-colors',
+                    isActive && 'bg-primary/15',
+                  )}
+                >
+                  <item.icon className="size-5" />
+                </span>
+                {item.label}
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
     </nav>
   )
 }

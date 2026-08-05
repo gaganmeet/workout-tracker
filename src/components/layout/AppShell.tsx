@@ -6,7 +6,7 @@ export function AppShell({ role, children }: { role: 'athlete' | 'coach'; childr
   return (
     <div className="flex min-h-svh flex-1 flex-col">
       <TopBar />
-      <main className="flex-1 pb-4">{children}</main>
+      <main className="mx-auto w-full max-w-2xl flex-1 pb-4">{children}</main>
       <BottomNav role={role} />
     </div>
   )

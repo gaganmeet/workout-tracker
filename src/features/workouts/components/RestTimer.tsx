@@ -1,11 +1,6 @@
 import { Pause, Play, SkipForward, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { useRestTimer } from '../useRestTimer'
 
 const DURATION_PRESETS = [30, 60, 90, 120, 180]
@@ -49,27 +44,27 @@ export function RestTimerBar({ timer }: { timer: ReturnType<typeof useRestTimer>
   if (timer.secondsLeft <= 0) return null
 
   return (
-    <div className="bg-card text-card-foreground fixed inset-x-0 bottom-16 z-10 flex items-center justify-center gap-3 border-t p-3 shadow-lg">
-      <span className="min-w-14 text-center text-lg font-semibold tabular-nums">
-        {formatTime(timer.secondsLeft)}
-      </span>
-      <Button type="button" variant="outline" size="sm" onClick={() => timer.addTime(-15)}>
-        -15s
-      </Button>
-      <Button type="button" variant="outline" size="sm" onClick={() => timer.addTime(15)}>
-        +15s
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        onClick={() => (timer.running ? timer.pause() : timer.resume())}
-      >
-        {timer.running ? <Pause className="size-4" /> : <Play className="size-4" />}
-      </Button>
-      <Button type="button" variant="ghost" size="icon" onClick={timer.skip}>
-        <SkipForward className="size-4" />
-      </Button>
+    <div className="bg-card text-card-foreground fixed inset-x-0 bottom-16 z-10 border-t shadow-lg">
+      <div className="mx-auto flex max-w-2xl items-center justify-center gap-3 p-3">
+        <span className="min-w-14 text-center text-lg font-semibold tabular-nums">{formatTime(timer.secondsLeft)}</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => timer.addTime(-15)}>
+          -15s
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => timer.addTime(15)}>
+          +15s
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => (timer.running ? timer.pause() : timer.resume())}
+        >
+          {timer.running ? <Pause className="size-4" /> : <Play className="size-4" />}
+        </Button>
+        <Button type="button" variant="ghost" size="icon" onClick={timer.skip}>
+          <SkipForward className="size-4" />
+        </Button>
+      </div>
     </div>
   )
 }
