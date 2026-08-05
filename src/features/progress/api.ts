@@ -30,6 +30,40 @@ function estimateOneRepMax(weight: number, reps: number): number {
   return weight * (1 + reps / 30)
 }
 
+export interface RecentExercise {
+  id: string
+  name: string
+}
+
+interface RawRecentSession {
+  workout_exercises: { exercises: RecentExercise | null }[]
+}
+
+// Most recently trained exercises, most recent first, deduped. Scans the
+// last 25 sessions for distinct exercises rather than a dedicated grouped
+// query -- ponytail: sessions with unusually low exercise variety could
+// undershoot `limit`; widen the session window if that shows up in practice.
+export async function fetchRecentExercises(userId: string, limit = 8): Promise<RecentExercise[]> {
+  const { data, error } = await supabase
+    .from('workout_sessions')
+    .select('workout_exercises(exercises(id, name))')
+    .eq('user_id', userId)
+    .order('started_at', { ascending: false })
+    .limit(25)
+  if (error) throw error
+
+  const sessions = data as unknown as RawRecentSession[]
+  const seen = new Map<string, RecentExercise>()
+  for (const session of sessions) {
+    for (const { exercises: exercise } of session.workout_exercises) {
+      if (!exercise || seen.has(exercise.id)) continue
+      seen.set(exercise.id, exercise)
+      if (seen.size >= limit) return [...seen.values()]
+    }
+  }
+  return [...seen.values()]
+}
+
 export type GymFilter = 'all' | 'none' | string
 
 export async function fetchExerciseProgress(

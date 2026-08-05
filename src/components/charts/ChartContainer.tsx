@@ -28,3 +28,14 @@ export const chartTooltipStyle = {
 export const CHART_COLOR = 'var(--chart-1)'
 export const CHART_GRID_COLOR = 'var(--border)'
 export const CHART_AXIS_COLOR = 'var(--muted-foreground)'
+
+// A label/value pair for the small stat readout above a chart -- e.g.
+// "Current" and "Best" -- so the headline numbers don't require hovering.
+export function ChartStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="text-lg font-semibold">{value}</p>
+    </div>
+  )
+}
